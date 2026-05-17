@@ -14,3 +14,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
+
+agent:
+  server:
+    url: ${AGENT_SERVER_URL:http://localhost:8000}
