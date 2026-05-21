@@ -16,6 +16,7 @@ import yu.likelion14th.allligo_was.domains.auth.repository.VerificationRepositor
 import yu.likelion14th.allligo_was.domains.user.repository.UserRepository;
 import yu.likelion14th.allligo_was.exception.CustomException;
 import yu.likelion14th.allligo_was.exception.ErrorCode;
+import yu.likelion14th.allligo_was.domains.auth.dto.response.EmailVerifyResDto;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -132,5 +133,24 @@ public class AuthService {
         if (!email.matches(emailRegex)) {
             throw new CustomException(ErrorCode.INVALID_EMAIL_FORMAT);
         }
+    }
+
+    @Transactional
+    public EmailVerifyResDto verifyEmail(String email, String token) {
+        validateEmailFormat(email);
+
+    Verification verification = verificationRepository.findByEmailAndToken(email, token)
+            .orElseThrow(() -> new CustomException(ErrorCode.EMAIL_TOKEN_INVALID));
+
+        if (verification.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new CustomException(ErrorCode.EMAIL_TOKEN_EXPIRED);
+        }
+
+        verification.completeVerification();
+
+        return EmailVerifyResDto.builder()
+                .verified(true)
+                .message("이메일 인증이 완료되었습니다.")
+                .build();
     }
 }

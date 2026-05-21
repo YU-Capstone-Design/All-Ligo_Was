@@ -141,4 +141,60 @@ public interface AuthAPI {
     ResponseEntity<?> sendVerificationEmail(
         @Valid @RequestBody EmailAddressReqDto dto
     );
+
+    @Operation(
+        summary = "이메일 인증 완료",
+        description = "인증 메일 링크의 email과 token을 검증하여 이메일 인증을 완료합니다."
+)
+@ApiResponses({
+        @ApiResponse(
+                responseCode = "200",
+                description = "이메일 인증 완료",
+                content = @Content(
+                        mediaType = "application/json",
+                        examples = @ExampleObject(
+                                value = """
+                                        {
+                                          "verified": true,
+                                          "message": "이메일 인증이 완료되었습니다."
+                                        }
+                                        """
+                        )
+                )
+        ),
+        @ApiResponse(
+                responseCode = "400",
+                description = "이메일 형식 오류 / 토큰 오류 / 인증 시간 만료",
+                content = @Content(
+                        mediaType = "application/json",
+                        examples = {
+                                @ExampleObject(
+                                        name = "토큰 오류",
+                                        value = """
+                                                {
+                                                  "status": 400,
+                                                  "message": "인증 토큰이 올바르지 않습니다."
+                                                }
+                                                """
+                                ),
+                                @ExampleObject(
+                                        name = "인증 시간 만료",
+                                        value = """
+                                                {
+                                                  "status": 400,
+                                                  "message": "인증 시간이 만료되었습니다."
+                                                }
+                                                """
+                                )
+                        }
+                )
+        )
+})
+ResponseEntity<?> verifyEmail(
+        @Parameter(description = "인증할 이메일", example = "test@example.com")
+        @RequestParam("email") String email,
+
+        @Parameter(description = "이메일 인증 토큰", example = "550e8400-e29b-41d4-a716-446655440000")
+        @RequestParam("token") String token
+);
 }

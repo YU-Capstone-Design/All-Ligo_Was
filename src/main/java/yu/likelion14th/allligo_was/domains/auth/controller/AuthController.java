@@ -25,4 +25,13 @@ public class AuthController implements AuthAPI{
     public ResponseEntity<?> sendVerificationEmail(@Valid @RequestBody EmailAddressReqDto dto) {
         return ResponseEntity.ok(authService.sendVerificationEmail(dto));
     }
+
+    @Override
+    @GetMapping("/email/verify")
+    public ResponseEntity<?> verifyEmail(
+            @RequestParam("email") String email,
+            @RequestParam("token") String token
+    ) {
+        return ResponseEntity.ok(authService.verifyEmail(email, token));
+    }
 }
