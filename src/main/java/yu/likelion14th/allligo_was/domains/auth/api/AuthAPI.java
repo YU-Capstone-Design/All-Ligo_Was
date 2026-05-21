@@ -40,7 +40,7 @@ public interface AuthAPI {
     ResponseEntity<?> checkEmail(
             @Parameter(description = "중복 확인할 이메일", example = "test@example.com") @RequestParam("email") String email);
 
-    @Operation(summary = "이메일 인증 메일 발송", description = "회원가입 시 입력한 이메일로 인증 메일을 발송합니다. 인증 메일은 5분 동안 유효합니다.")
+    @Operation(summary = "이메일 인증 메일 발송", description = "회원가입 시 입력한 이메일로 인증 메일을 발송합니다. 메일의 인증하기 버튼은 백엔드 인증 API를 호출하며, 인증 링크는 5분 동안 유효합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "인증 메일 발송 성공", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
                     {
@@ -70,14 +70,9 @@ public interface AuthAPI {
     ResponseEntity<?> sendVerificationEmail(
             @Valid @RequestBody EmailAddressReqDto dto);
 
-    @Operation(summary = "이메일 인증 완료", description = "인증 메일 링크의 email과 token을 검증하여 이메일 인증을 완료합니다.")
+    @Operation(summary = "이메일 인증 완료", description = "인증 메일 링크의 email과 token을 검증하여 이메일 인증을 완료합니다. 인증 성공 시 프론트의 인증 완료 안내 화면으로 리다이렉트합니다.")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "이메일 인증 완료", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                    {
-                      "verified": true,
-                      "message": "이메일 인증이 완료되었습니다."
-                    }
-                    """))),
+            @ApiResponse(responseCode = "302", description = "이메일 인증 완료 후 프론트 인증 완료 안내 화면으로 리다이렉트"),
             @ApiResponse(responseCode = "400", description = "이메일 형식 오류 / 토큰 오류 / 인증 시간 만료", content = @Content(mediaType = "application/json", examples = {
                     @ExampleObject(name = "토큰 오류", value = """
                             {
@@ -93,7 +88,7 @@ public interface AuthAPI {
                             """)
             }))
     })
-    ResponseEntity<?> verifyEmail(
+    ResponseEntity<Void> verifyEmail(
             @Parameter(description = "인증할 이메일", example = "test@example.com") @RequestParam("email") String email,
 
             @Parameter(description = "이메일 인증 토큰", example = "550e8400-e29b-41d4-a716-446655440000") @RequestParam("token") String token);
