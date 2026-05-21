@@ -30,8 +30,8 @@ public class AuthService {
     private final VerificationRepository verificationRepository;
     private final JavaMailSender mailSender;
 
-    @Value("${app.frontend.verify-url}")
-    private String frontendVerifyUrl;
+    @Value("${app.backend.verify-url}")
+    private String backendVerifyUrl;
 
     @Value("${spring.mail.username}")
     private String fromEmail;
@@ -90,7 +90,7 @@ public class AuthService {
     }
 
     private void sendMail(String toEmail, String token) {
-        String verifyLink = frontendVerifyUrl + "?email=" + toEmail + "&token=" + token;
+        String verifyLink = backendVerifyUrl + "?email=" + toEmail + "&token=" + token;
 
         try {
             MimeMessage message = mailSender.createMimeMessage();

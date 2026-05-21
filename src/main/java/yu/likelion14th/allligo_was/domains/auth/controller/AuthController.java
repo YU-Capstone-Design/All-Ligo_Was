@@ -1,9 +1,13 @@
 package yu.likelion14th.allligo_was.domains.auth.controller;
 
 import lombok.RequiredArgsConstructor;
+
+import java.net.URI;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.beans.factory.annotation.Value;
 import jakarta.validation.Valid;
 import yu.likelion14th.allligo_was.domains.auth.api.AuthAPI;
 import yu.likelion14th.allligo_was.domains.auth.dto.request.EmailAddressReqDto;
@@ -12,7 +16,7 @@ import yu.likelion14th.allligo_was.domains.auth.service.AuthService;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
-public class AuthController implements AuthAPI{
+public class AuthController implements AuthAPI {
 
     private final AuthService authService;
 
@@ -26,12 +30,17 @@ public class AuthController implements AuthAPI{
         return ResponseEntity.ok(authService.sendVerificationEmail(dto));
     }
 
-    @Override
+    @Value("${app.frontend.verify-complete-url}")
+    private String frontendVerifyCompleteUrl;
+
     @GetMapping("/email/verify")
-    public ResponseEntity<?> verifyEmail(
+    public ResponseEntity<Void> verifyEmail(
             @RequestParam("email") String email,
-            @RequestParam("token") String token
-    ) {
-        return ResponseEntity.ok(authService.verifyEmail(email, token));
+            @RequestParam("token") String token) {
+        authService.verifyEmail(email, token);
+
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create(frontendVerifyCompleteUrl))
+                .build();
     }
 }

@@ -16,185 +16,85 @@ import yu.likelion14th.allligo_was.domains.auth.dto.request.EmailAddressReqDto;
 @Tag(name = "Auth API", description = "회원가입, 로그인, 이메일 인증 관련 API입니다.")
 public interface AuthAPI {
 
-    @Operation(
-            summary = "이메일 중복 확인",
-            description = "회원가입 시 입력한 이메일의 형식을 검증하고, 이미 등록된 이메일인지 확인합니다."
-    )
+    @Operation(summary = "이메일 중복 확인", description = "회원가입 시 입력한 이메일의 형식을 검증하고, 이미 등록된 이메일인지 확인합니다.")
     @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "사용 가능한 이메일",
-                    content = @Content(
-                            mediaType = "application/json",
-                            examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "available": true,
-                                              "message": "사용 가능한 이메일입니다."
-                                            }
-                                            """
-                            )
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "이메일 형식 오류",
-                    content = @Content(
-                            mediaType = "application/json",
-                            examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "status": 400,
-                                              "message": "이메일 형식을 맞추어 작성해주세요."
-                                            }
-                                            """
-                            )
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "409",
-                    description = "이미 등록된 이메일",
-                    content = @Content(
-                            mediaType = "application/json",
-                            examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "status": 409,
-                                              "message": "이미 등록된 메일은 사용할 수 없어요."
-                                            }
-                                            """
-                            )
-                    )
-            )
+            @ApiResponse(responseCode = "200", description = "사용 가능한 이메일", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                    {
+                      "available": true,
+                      "message": "사용 가능한 이메일입니다."
+                    }
+                    """))),
+            @ApiResponse(responseCode = "400", description = "이메일 형식 오류", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                    {
+                      "status": 400,
+                      "message": "이메일 형식을 맞추어 작성해주세요."
+                    }
+                    """))),
+            @ApiResponse(responseCode = "409", description = "이미 등록된 이메일", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                    {
+                      "status": 409,
+                      "message": "이미 등록된 메일은 사용할 수 없어요."
+                    }
+                    """)))
     })
     ResponseEntity<?> checkEmail(
-            @Parameter(description = "중복 확인할 이메일", example = "test@example.com")
-            @RequestParam("email") String email
-    );
+            @Parameter(description = "중복 확인할 이메일", example = "test@example.com") @RequestParam("email") String email);
 
-    @Operation(
-            summary = "이메일 인증 메일 발송",
-            description = "회원가입 시 입력한 이메일로 인증 메일을 발송합니다. 인증 메일은 5분 동안 유효합니다."
-    )
+    @Operation(summary = "이메일 인증 메일 발송", description = "회원가입 시 입력한 이메일로 인증 메일을 발송합니다. 인증 메일은 5분 동안 유효합니다.")
     @ApiResponses({
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "인증 메일 발송 성공",
-                    content = @Content(
-                            mediaType = "application/json",
-                            examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "message": "인증 메일이 발송되었습니다.",
-                                              "expiresInMinutes": 5
-                                            }
-                                            """
-                            )
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "이메일 형식 오류",
-                    content = @Content(
-                            mediaType = "application/json",
-                            examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "status": 400,
-                                              "message": "이메일 형식을 맞추어 작성해주세요."
-                                            }
-                                            """
-                            )
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "409",
-                    description = "이미 등록된 이메일",
-                    content = @Content(
-                            mediaType = "application/json",
-                            examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "status": 409,
-                                              "message": "이미 등록된 메일은 사용할 수 없어요."
-                                            }
-                                            """
-                            )
-                    )
-            ),
-            @ApiResponse(
-                    responseCode = "500",
-                    description = "인증 메일 발송 실패",
-                    content = @Content(
-                            mediaType = "application/json",
-                            examples = @ExampleObject(
-                                    value = """
-                                            {
-                                              "status": 500,
-                                              "message": "인증 메일 발송에 실패했습니다."
-                                            }
-                                            """
-                            )
-                    )
-            )
+            @ApiResponse(responseCode = "200", description = "인증 메일 발송 성공", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                    {
+                      "message": "인증 메일이 발송되었습니다.",
+                      "expiresInMinutes": 5
+                    }
+                    """))),
+            @ApiResponse(responseCode = "400", description = "이메일 형식 오류", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                    {
+                      "status": 400,
+                      "message": "이메일 형식을 맞추어 작성해주세요."
+                    }
+                    """))),
+            @ApiResponse(responseCode = "409", description = "이미 등록된 이메일", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                    {
+                      "status": 409,
+                      "message": "이미 등록된 메일은 사용할 수 없어요."
+                    }
+                    """))),
+            @ApiResponse(responseCode = "500", description = "인증 메일 발송 실패", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                    {
+                      "status": 500,
+                      "message": "인증 메일 발송에 실패했습니다."
+                    }
+                    """)))
     })
     ResponseEntity<?> sendVerificationEmail(
-        @Valid @RequestBody EmailAddressReqDto dto
-    );
+            @Valid @RequestBody EmailAddressReqDto dto);
 
-    @Operation(
-        summary = "이메일 인증 완료",
-        description = "인증 메일 링크의 email과 token을 검증하여 이메일 인증을 완료합니다."
-)
-@ApiResponses({
-        @ApiResponse(
-                responseCode = "200",
-                description = "이메일 인증 완료",
-                content = @Content(
-                        mediaType = "application/json",
-                        examples = @ExampleObject(
-                                value = """
-                                        {
-                                          "verified": true,
-                                          "message": "이메일 인증이 완료되었습니다."
-                                        }
-                                        """
-                        )
-                )
-        ),
-        @ApiResponse(
-                responseCode = "400",
-                description = "이메일 형식 오류 / 토큰 오류 / 인증 시간 만료",
-                content = @Content(
-                        mediaType = "application/json",
-                        examples = {
-                                @ExampleObject(
-                                        name = "토큰 오류",
-                                        value = """
-                                                {
-                                                  "status": 400,
-                                                  "message": "인증 토큰이 올바르지 않습니다."
-                                                }
-                                                """
-                                ),
-                                @ExampleObject(
-                                        name = "인증 시간 만료",
-                                        value = """
-                                                {
-                                                  "status": 400,
-                                                  "message": "인증 시간이 만료되었습니다."
-                                                }
-                                                """
-                                )
-                        }
-                )
-        )
-})
-ResponseEntity<?> verifyEmail(
-        @Parameter(description = "인증할 이메일", example = "test@example.com")
-        @RequestParam("email") String email,
+    @Operation(summary = "이메일 인증 완료", description = "인증 메일 링크의 email과 token을 검증하여 이메일 인증을 완료합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "이메일 인증 완료", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                    {
+                      "verified": true,
+                      "message": "이메일 인증이 완료되었습니다."
+                    }
+                    """))),
+            @ApiResponse(responseCode = "400", description = "이메일 형식 오류 / 토큰 오류 / 인증 시간 만료", content = @Content(mediaType = "application/json", examples = {
+                    @ExampleObject(name = "토큰 오류", value = """
+                            {
+                              "status": 400,
+                              "message": "인증 토큰이 올바르지 않습니다."
+                            }
+                            """),
+                    @ExampleObject(name = "인증 시간 만료", value = """
+                            {
+                              "status": 400,
+                              "message": "인증 시간이 만료되었습니다."
+                            }
+                            """)
+            }))
+    })
+    ResponseEntity<?> verifyEmail(
+            @Parameter(description = "인증할 이메일", example = "test@example.com") @RequestParam("email") String email,
 
-        @Parameter(description = "이메일 인증 토큰", example = "550e8400-e29b-41d4-a716-446655440000")
-        @RequestParam("token") String token
-);
+            @Parameter(description = "이메일 인증 토큰", example = "550e8400-e29b-41d4-a716-446655440000") @RequestParam("token") String token);
 }
