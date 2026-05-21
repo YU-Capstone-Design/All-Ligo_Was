@@ -17,6 +17,7 @@ import yu.likelion14th.allligo_was.domains.user.repository.UserRepository;
 import yu.likelion14th.allligo_was.exception.CustomException;
 import yu.likelion14th.allligo_was.exception.ErrorCode;
 import yu.likelion14th.allligo_was.domains.auth.dto.response.EmailVerifyResDto;
+import yu.likelion14th.allligo_was.domains.auth.dto.response.EmailStatusResDto;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -113,7 +114,8 @@ public class AuthService {
                         </a>
                     </body>
                     </html>
-                    """.formatted(verifyLink);
+                    """
+                    .formatted(verifyLink);
 
             helper.setText(html, true);
             mailSender.send(message);
@@ -139,8 +141,8 @@ public class AuthService {
     public EmailVerifyResDto verifyEmail(String email, String token) {
         validateEmailFormat(email);
 
-    Verification verification = verificationRepository.findByEmailAndToken(email, token)
-            .orElseThrow(() -> new CustomException(ErrorCode.EMAIL_TOKEN_INVALID));
+        Verification verification = verificationRepository.findByEmailAndToken(email, token)
+                .orElseThrow(() -> new CustomException(ErrorCode.EMAIL_TOKEN_INVALID));
 
         if (verification.getExpiresAt().isBefore(LocalDateTime.now())) {
             throw new CustomException(ErrorCode.EMAIL_TOKEN_EXPIRED);
@@ -151,6 +153,18 @@ public class AuthService {
         return EmailVerifyResDto.builder()
                 .verified(true)
                 .message("이메일 인증이 완료되었습니다.")
+                .build();
+    }
+
+    public EmailStatusResDto getEmailVerificationStatus(String email) {
+        validateEmailFormat(email);
+
+        Verification verification = verificationRepository.findByEmail(email)
+                .orElseThrow(() -> new CustomException(ErrorCode.EMAIL_NOT_FOUND));
+
+        return EmailStatusResDto.builder()
+                .email(email)
+                .verified(verification.isVerified())
                 .build();
     }
 }

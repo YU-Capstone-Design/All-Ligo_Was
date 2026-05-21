@@ -39,5 +39,7 @@ agent:
     url: ${AGENT_SERVER_URL:http://localhost:8000}
 
 app:
+  backend:
+    verify-url: ${BACKEND_VERIFY_URL}
   frontend:
-    verify-url: ${FRONTEND_VERIFY_URL}
+    verify-complete-url: ${FRONTEND_VERIFY_COMPLETE_URL}

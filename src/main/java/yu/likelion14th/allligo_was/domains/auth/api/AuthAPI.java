@@ -97,4 +97,36 @@ public interface AuthAPI {
             @Parameter(description = "인증할 이메일", example = "test@example.com") @RequestParam("email") String email,
 
             @Parameter(description = "이메일 인증 토큰", example = "550e8400-e29b-41d4-a716-446655440000") @RequestParam("token") String token);
+
+    @Operation(summary = "이메일 인증 상태 확인", description = "회원가입 화면에서 완료 버튼을 눌렀을 때 해당 이메일의 인증 완료 여부를 확인합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "이메일 인증 상태 조회 성공", content = @Content(mediaType = "application/json", examples = {
+                    @ExampleObject(name = "인증 완료", value = """
+                            {
+                              "email": "test@example.com",
+                              "verified": true
+                            }
+                            """),
+                    @ExampleObject(name = "인증 미완료", value = """
+                            {
+                              "email": "test@example.com",
+                              "verified": false
+                            }
+                            """)
+            })),
+            @ApiResponse(responseCode = "400", description = "이메일 형식 오류", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                    {
+                      "status": 400,
+                      "message": "이메일 형식을 맞추어 작성해주세요."
+                    }
+                    """))),
+            @ApiResponse(responseCode = "404", description = "해당 이메일 인증 정보 없음", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                    {
+                      "status": 404,
+                      "message": "해당 이메일 인증 정보를 찾을 수 없습니다."
+                    }
+                    """)))
+    })
+    ResponseEntity<?> getEmailVerificationStatus(
+            @Parameter(description = "인증 상태를 확인할 이메일", example = "test@example.com") @RequestParam("email") String email);
 }

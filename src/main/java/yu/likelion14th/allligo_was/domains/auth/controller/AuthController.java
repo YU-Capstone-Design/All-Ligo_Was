@@ -43,4 +43,11 @@ public class AuthController implements AuthAPI {
                 .location(URI.create(frontendVerifyCompleteUrl))
                 .build();
     }
+
+    @Override
+    @GetMapping("/email/status")
+    public ResponseEntity<?> getEmailVerificationStatus(
+            @RequestParam("email") String email) {
+        return ResponseEntity.ok(authService.getEmailVerificationStatus(email));
+    }
 }
