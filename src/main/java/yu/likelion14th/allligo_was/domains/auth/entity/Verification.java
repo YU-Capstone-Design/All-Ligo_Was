@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,6 +14,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "verification")
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
@@ -21,6 +23,7 @@ public class Verification {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "verification_id")
     private Long verificationId;
 
     @Column(name = "token", nullable = false)
@@ -41,4 +44,15 @@ public class Verification {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
+    public void updateVerification(String token, LocalDateTime expiresAt) {
+        this.token = token;
+        this.isVerified = false;
+        this.expiresAt = expiresAt;
+        this.verifiedAt = null;
+    }
+
+    public void completeVerification() {
+        this.isVerified = true;
+        this.verifiedAt = LocalDateTime.now();
+    }
 }
