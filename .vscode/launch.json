@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Run All-Ligo WAS",
+      "request": "launch",
+      "mainClass": "yu.likelion14th.allligo_was.AllLigoWasApplication",
+      "projectName": "All-Ligo_WAS",
+      "envFile": "${workspaceFolder}/.env"
+    }
+  ]
+}
