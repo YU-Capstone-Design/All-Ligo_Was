@@ -15,34 +15,52 @@ public interface AuthAPI {
 
     @Operation(
             summary = "이메일 중복 확인",
-            description = "회원가입 시 입력한 이메일이 이미 등록된 이메일인지 확인합니다."
+            description = "회원가입 시 입력한 이메일의 형식을 검증하고, 이미 등록된 이메일인지 확인합니다."
     )
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
-                    description = "이메일 중복 확인 성공",
+                    description = "사용 가능한 이메일",
                     content = @Content(
                             mediaType = "application/json",
-                            examples = {
-                                    @ExampleObject(
-                                            name = "사용 가능한 이메일",
-                                            value = """
-                                                    {
-                                                      "available": true,
-                                                      "message": "사용 가능한 이메일입니다."
-                                                    }
-                                                    """
-                                    ),
-                                    @ExampleObject(
-                                            name = "이미 등록된 이메일",
-                                            value = """
-                                                    {
-                                                      "available": false,
-                                                      "message": "이미 등록된 메일은 사용할 수 없어요."
-                                                    }
-                                                    """
-                                    )
-                            }
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "available": true,
+                                              "message": "사용 가능한 이메일입니다."
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "이메일 형식 오류",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "status": 400,
+                                              "message": "이메일 형식을 맞추어 작성해주세요."
+                                            }
+                                            """
+                            )
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "이미 등록된 이메일",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            {
+                                              "status": 409,
+                                              "message": "이미 등록된 메일은 사용할 수 없어요."
+                                            }
+                                            """
+                            )
                     )
             )
     })
