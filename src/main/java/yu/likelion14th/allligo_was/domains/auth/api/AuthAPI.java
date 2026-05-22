@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import yu.likelion14th.allligo_was.domains.auth.dto.request.EmailAddressReqDto;
 import yu.likelion14th.allligo_was.domains.auth.dto.request.SignUpReqDto;
+import yu.likelion14th.allligo_was.domains.auth.dto.request.LoginReqDto;
 
 @Tag(name = "Auth API", description = "회원가입, 로그인, 이메일 인증 관련 API입니다.")
 public interface AuthAPI {
@@ -141,4 +142,25 @@ public interface AuthAPI {
     })
     ResponseEntity<?> signup(
             @Valid @RequestBody SignUpReqDto dto);
+
+    @Operation(summary = "소상공인 로그인", description = "가입된 소상공인 계정의 이메일과 비밀번호를 검증한 뒤 JWT 토큰을 발급합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "로그인 성공", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                    {
+                      "userId": 1,
+                      "email": "owner@example.com",
+                      "accessToken": "eyJhbGciOiJIUzI1NiJ9...",
+                      "refreshToken": "eyJhbGciOiJIUzI1NiJ9...",
+                      "message": "로그인에 성공했습니다."
+                    }
+                    """))),
+            @ApiResponse(responseCode = "401", description = "로그인 실패", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                    {
+                      "status": 401,
+                      "message": "이메일 또는 비밀번호가 일치하지 않습니다."
+                    }
+                    """)))
+    })
+    ResponseEntity<?> login(
+            @Valid @RequestBody LoginReqDto dto);
 }

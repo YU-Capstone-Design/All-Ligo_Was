@@ -22,6 +22,8 @@ public enum ErrorCode {
     STORE_REQUIRED(HttpStatus.BAD_REQUEST, "가게 정보는 필수 입력입니다."),
     INVALID_STORE_URL(HttpStatus.BAD_REQUEST, "올바른 링크 형식으로 입력해 주세요."),
 
+    LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 일치하지 않습니다."),
+
     INVALID_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다.");
 
