@@ -13,11 +13,17 @@ import yu.likelion14th.allligo_was.domains.auth.dto.response.EmailCheckResDto;
 import yu.likelion14th.allligo_was.domains.auth.dto.response.EmailSendResDto;
 import yu.likelion14th.allligo_was.domains.auth.entity.Verification;
 import yu.likelion14th.allligo_was.domains.auth.repository.VerificationRepository;
+import yu.likelion14th.allligo_was.domains.store.repository.StoreRepository;
 import yu.likelion14th.allligo_was.domains.user.repository.UserRepository;
 import yu.likelion14th.allligo_was.exception.CustomException;
 import yu.likelion14th.allligo_was.exception.ErrorCode;
 import yu.likelion14th.allligo_was.domains.auth.dto.response.EmailVerifyResDto;
 import yu.likelion14th.allligo_was.domains.auth.dto.response.EmailStatusResDto;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import yu.likelion14th.allligo_was.domains.auth.dto.request.SignUpReqDto;
+import yu.likelion14th.allligo_was.domains.auth.dto.response.SignUpResDto;
+import yu.likelion14th.allligo_was.domains.store.entity.Store;
+import yu.likelion14th.allligo_was.domains.user.entity.User;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -30,6 +36,8 @@ public class AuthService {
     private final UserRepository userRepository;
     private final VerificationRepository verificationRepository;
     private final JavaMailSender mailSender;
+    private final StoreRepository storeRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Value("${app.backend.verify-url}")
     private String backendVerifyUrl;
@@ -167,4 +175,70 @@ public class AuthService {
                 .verified(verification.isVerified())
                 .build();
     }
+
+    @Transactional
+public SignUpResDto signup(SignUpReqDto dto) {
+    if (userRepository.existsByEmail(dto.getEmail())) {
+        throw new CustomException(ErrorCode.EMAIL_ALREADY_EXISTS);
+    }
+
+    Verification verification = verificationRepository.findByEmail(dto.getEmail())
+            .orElseThrow(() -> new CustomException(ErrorCode.EMAIL_NOT_FOUND));
+
+    if (!verification.isVerified()) {
+        throw new CustomException(ErrorCode.EMAIL_NOT_VERIFIED);
+    }
+
+    validatePassword(dto.getPassword(), dto.getPasswordConfirm());
+    validateStoreInfo(dto);
+
+    User user = User.builder()
+            .email(dto.getEmail())
+            .password(passwordEncoder.encode(dto.getPassword()))
+            .emailVerified(true)
+            .createdAt(LocalDateTime.now())
+            .build();
+
+    User savedUser = userRepository.save(user);
+
+    Store store = Store.builder()
+            .storeName(dto.getStoreName())
+            .latitude(dto.getLatitude())
+            .longitude(dto.getLongitude())
+            .mapUrl(dto.getMapUrl())
+            .createdAt(LocalDateTime.now())
+            .user(savedUser)
+            .build();
+
+    Store savedStore = storeRepository.save(store);
+
+    return SignUpResDto.builder()
+            .userId(savedUser.getUserId())
+            .storeId(savedStore.getStoreId())
+            .message("회원가입이 완료되었습니다.")
+            .build();
+}
+
+private void validatePassword(String password, String passwordConfirm) {
+    if (password == null || password.length() < 6 || password.length() > 12) {
+        throw new CustomException(ErrorCode.PASSWORD_INVALID_LENGTH);
+    }
+
+    if (!password.equals(passwordConfirm)) {
+        throw new CustomException(ErrorCode.PASSWORD_NOT_MATCH);
+    }
+}
+
+private void validateStoreInfo(SignUpReqDto dto) {
+    if (dto.getStoreName() == null || dto.getStoreName().isBlank()
+            || dto.getMapUrl() == null || dto.getMapUrl().isBlank()
+            || dto.getLatitude() == null
+            || dto.getLongitude() == null) {
+        throw new CustomException(ErrorCode.STORE_REQUIRED);
+    }
+
+    if (!dto.getMapUrl().startsWith("http://") && !dto.getMapUrl().startsWith("https://")) {
+        throw new CustomException(ErrorCode.INVALID_STORE_URL);
+    }
+}
 }

@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import yu.likelion14th.allligo_was.domains.auth.dto.request.EmailAddressReqDto;
+import yu.likelion14th.allligo_was.domains.auth.dto.request.SignUpReqDto;
 
 @Tag(name = "Auth API", description = "회원가입, 로그인, 이메일 인증 관련 API입니다.")
 public interface AuthAPI {
@@ -124,4 +125,20 @@ public interface AuthAPI {
     })
     ResponseEntity<?> getEmailVerificationStatus(
             @Parameter(description = "인증 상태를 확인할 이메일", example = "test@example.com") @RequestParam("email") String email);
+
+    @Operation(summary = "소상공인 회원가입", description = "이메일 인증이 완료된 사용자의 계정과 가게 정보를 등록합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "회원가입 성공", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                    {
+                      "userId": 1,
+                      "storeId": 1,
+                      "message": "회원가입이 완료되었습니다."
+                    }
+                    """))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 / 비밀번호 오류 / 이메일 미인증"),
+            @ApiResponse(responseCode = "404", description = "이메일 인증 정보 없음"),
+            @ApiResponse(responseCode = "409", description = "이미 등록된 이메일")
+    })
+    ResponseEntity<?> signup(
+            @Valid @RequestBody SignUpReqDto dto);
 }

@@ -16,8 +16,11 @@ public enum ErrorCode {
     EMAIL_TOKEN_INVALID(HttpStatus.BAD_REQUEST, "인증 토큰이 올바르지 않습니다."),
     EMAIL_TOKEN_EXPIRED(HttpStatus.BAD_REQUEST, "인증 시간이 만료되었습니다."),
 
-    PASSWORD_INVALID_LENGTH(HttpStatus.BAD_REQUEST, "비밀번호는 6자 이상 12자 이하로 입력해주세요."),
+    PASSWORD_INVALID_LENGTH(HttpStatus.BAD_REQUEST, "6자 이상, 12자 이하로 입력해주세요."),
     PASSWORD_NOT_MATCH(HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
+
+    STORE_REQUIRED(HttpStatus.BAD_REQUEST, "가게 정보는 필수 입력입니다."),
+    INVALID_STORE_URL(HttpStatus.BAD_REQUEST, "올바른 링크 형식으로 입력해 주세요."),
 
     INVALID_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다.");
