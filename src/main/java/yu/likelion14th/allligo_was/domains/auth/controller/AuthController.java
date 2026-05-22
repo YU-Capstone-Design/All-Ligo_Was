@@ -12,6 +12,8 @@ import jakarta.validation.Valid;
 import yu.likelion14th.allligo_was.domains.auth.api.AuthAPI;
 import yu.likelion14th.allligo_was.domains.auth.dto.request.EmailAddressReqDto;
 import yu.likelion14th.allligo_was.domains.auth.service.AuthService;
+import yu.likelion14th.allligo_was.domains.auth.dto.request.SignUpReqDto;
+import yu.likelion14th.allligo_was.domains.auth.dto.request.LoginReqDto;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -49,5 +51,17 @@ public class AuthController implements AuthAPI {
     public ResponseEntity<?> getEmailVerificationStatus(
             @RequestParam("email") String email) {
         return ResponseEntity.ok(authService.getEmailVerificationStatus(email));
+    }
+
+    @Override
+    @PostMapping("/signup")
+    public ResponseEntity<?> signup(@Valid @RequestBody SignUpReqDto dto) {
+        return ResponseEntity.ok(authService.signup(dto));
+    }
+
+    @Override
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@Valid @RequestBody LoginReqDto dto) {
+        return ResponseEntity.ok(authService.login(dto));
     }
 }

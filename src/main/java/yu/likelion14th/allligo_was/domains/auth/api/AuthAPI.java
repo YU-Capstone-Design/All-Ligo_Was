@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import yu.likelion14th.allligo_was.domains.auth.dto.request.EmailAddressReqDto;
+import yu.likelion14th.allligo_was.domains.auth.dto.request.SignUpReqDto;
+import yu.likelion14th.allligo_was.domains.auth.dto.request.LoginReqDto;
 
 @Tag(name = "Auth API", description = "회원가입, 로그인, 이메일 인증 관련 API입니다.")
 public interface AuthAPI {
@@ -124,4 +126,41 @@ public interface AuthAPI {
     })
     ResponseEntity<?> getEmailVerificationStatus(
             @Parameter(description = "인증 상태를 확인할 이메일", example = "test@example.com") @RequestParam("email") String email);
+
+    @Operation(summary = "소상공인 회원가입", description = "이메일 인증이 완료된 사용자의 계정과 가게 정보를 등록합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "회원가입 성공", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                    {
+                      "userId": 1,
+                      "storeId": 1,
+                      "message": "회원가입이 완료되었습니다."
+                    }
+                    """))),
+            @ApiResponse(responseCode = "400", description = "잘못된 요청 / 비밀번호 오류 / 이메일 미인증"),
+            @ApiResponse(responseCode = "404", description = "이메일 인증 정보 없음"),
+            @ApiResponse(responseCode = "409", description = "이미 등록된 이메일")
+    })
+    ResponseEntity<?> signup(
+            @Valid @RequestBody SignUpReqDto dto);
+
+    @Operation(summary = "소상공인 로그인", description = "가입된 소상공인 계정의 이메일과 비밀번호를 검증한 뒤 JWT 토큰을 발급합니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "로그인 성공", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                    {
+                      "userId": 1,
+                      "email": "owner@example.com",
+                      "accessToken": "eyJhbGciOiJIUzI1NiJ9...",
+                      "refreshToken": "eyJhbGciOiJIUzI1NiJ9...",
+                      "message": "로그인에 성공했습니다."
+                    }
+                    """))),
+            @ApiResponse(responseCode = "401", description = "로그인 실패", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                    {
+                      "status": 401,
+                      "message": "이메일 또는 비밀번호가 일치하지 않습니다."
+                    }
+                    """)))
+    })
+    ResponseEntity<?> login(
+            @Valid @RequestBody LoginReqDto dto);
 }
