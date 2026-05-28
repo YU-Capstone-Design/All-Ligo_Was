@@ -35,7 +35,7 @@ public interface UserAPI {
                                               "mapUrl": "https://map.naver.com/p/example",
                                               "latitude": 35.836123,
                                               "longitude": 128.752345,
-                                              "profileImageUrl": "https://spring.allligo-agent.cloud/images/default-profile.png"
+                                              "profileImageUrl": "https://all-ligo-images.s3.ap-northeast-2.amazonaws.com/default/default-profile.png"
                                             }
                                             """
                             )
@@ -97,7 +97,7 @@ public interface UserAPI {
                                               "mapUrl": "https://map.naver.com/p/updated",
                                               "latitude": 35.837777,
                                               "longitude": 128.753333,
-                                              "profileImageUrl": "https://spring.allligo-agent.cloud/images/default-profile.png"
+                                              "profileImageUrl": "https://{bucket}.s3.ap-northeast-2.amazonaws.com/default/default-profile.png"
                                             }
                                             """
                             )
