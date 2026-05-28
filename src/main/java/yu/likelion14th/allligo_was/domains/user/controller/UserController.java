@@ -4,6 +4,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import yu.likelion14th.allligo_was.domains.user.api.UserAPI;
 import yu.likelion14th.allligo_was.domains.user.dto.request.UserProfileUpdateReqDto;
 import yu.likelion14th.allligo_was.domains.user.service.UserService;
 import yu.likelion14th.allligo_was.security.JwtUtil;
@@ -11,11 +13,12 @@ import yu.likelion14th.allligo_was.security.JwtUtil;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/users")
-public class UserController {
+public class UserController implements UserAPI {
 
     private final UserService userService;
     private final JwtUtil jwtUtil;
 
+    @Override
     @GetMapping("/me")
     public ResponseEntity<?> getMyPage(
             @RequestHeader("Authorization") String authorizationHeader
@@ -24,6 +27,7 @@ public class UserController {
         return ResponseEntity.ok(userService.getMyPage(userId));
     }
 
+    @Override
     @PatchMapping("/me/profile")
     public ResponseEntity<?> updateProfile(
             @RequestHeader("Authorization") String authorizationHeader,
