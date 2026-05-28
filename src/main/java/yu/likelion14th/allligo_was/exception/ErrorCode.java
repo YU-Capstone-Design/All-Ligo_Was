@@ -28,6 +28,8 @@ public enum ErrorCode {
     STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "매장 정보를 찾을 수 없습니다."),
     INVALID_LINK(HttpStatus.BAD_REQUEST, "링크가 유효하지 않습니다."),
 
+    INVALID_COUPON_IMAGE_URL(HttpStatus.BAD_REQUEST, "쿠폰 이미지 URL이 유효하지 않습니다."),
+    
     INVALID_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다.");
 

@@ -1,7 +1,6 @@
 package yu.likelion14th.allligo_was.domains.user.api;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -10,7 +9,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import yu.likelion14th.allligo_was.domains.user.dto.request.UserProfileUpdateReqDto;
 
 @Tag(name = "User API", description = "마이페이지 및 사용자 정보 관련 API입니다.")
@@ -18,7 +16,10 @@ public interface UserAPI {
 
     @Operation(
             summary = "마이페이지 정보 조회",
-            description = "로그인한 소상공인의 이메일, 가게 이름, 지도 링크, 위치 정보, 프로필 이미지 URL을 조회합니다."
+            description = """
+                    로그인한 소상공인의 이메일, 가게 이름, 지도 링크, 위치 정보, 프로필 이미지 URL을 조회합니다.
+                    Swagger 상단의 Authorize 버튼에 Bearer 토큰을 입력한 후 요청해야 합니다.
+                    """
     )
     @ApiResponses({
             @ApiResponse(
@@ -71,10 +72,7 @@ public interface UserAPI {
                     )
             )
     })
-    ResponseEntity<?> getMyPage(
-            @Parameter(description = "JWT Access Token", example = "Bearer eyJhbGciOiJIUzI1NiJ9...")
-            @RequestHeader("Authorization") String authorizationHeader
-    );
+    ResponseEntity<?> getMyPage();
 
     @Operation(
             summary = "프로필 및 가게 정보 수정",
@@ -82,6 +80,7 @@ public interface UserAPI {
                     로그인한 소상공인의 가게 정보를 수정합니다.
                     수정 가능한 정보는 가게 이름, 지도 링크, 위도, 경도입니다.
                     유효하지 않은 링크 입력 시 "링크가 유효하지 않습니다." 에러 메시지를 반환합니다.
+                    Swagger 상단의 Authorize 버튼에 Bearer 토큰을 입력한 후 요청해야 합니다.
                     """
     )
     @ApiResponses({
@@ -163,9 +162,6 @@ public interface UserAPI {
             )
     })
     ResponseEntity<?> updateProfile(
-            @Parameter(description = "JWT Access Token", example = "Bearer eyJhbGciOiJIUzI1NiJ9...")
-            @RequestHeader("Authorization") String authorizationHeader,
-
             @Valid @RequestBody UserProfileUpdateReqDto dto
     );
 }
