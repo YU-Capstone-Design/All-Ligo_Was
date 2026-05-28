@@ -43,6 +43,8 @@ app:
     verify-url: ${BACKEND_VERIFY_URL}
   frontend:
     verify-complete-url: ${FRONTEND_VERIFY_COMPLETE_URL}
+  image:
+    default-profile-url: ${DEFAULT_PROFILE_IMAGE_URL}
 
 server:
   port: ${SERVER_PORT:8080}

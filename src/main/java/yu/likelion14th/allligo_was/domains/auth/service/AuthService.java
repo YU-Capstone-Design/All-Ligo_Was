@@ -49,6 +49,9 @@ public class AuthService {
     @Value("${spring.mail.username}")
     private String fromEmail;
 
+    @Value("${app.image.default-profile-url}")
+    private String defaultProfileImageUrl;
+
     public EmailCheckResDto checkEmailDuplication(String email) {
         validateEmailFormat(email);
 
@@ -159,6 +162,7 @@ public class AuthService {
                 .latitude(dto.getLatitude())
                 .longitude(dto.getLongitude())
                 .mapUrl(dto.getMapUrl())
+                .profileImageUrl(defaultProfileImageUrl)
                 .createdAt(LocalDateTime.now())
                 .user(savedUser)
                 .build();
