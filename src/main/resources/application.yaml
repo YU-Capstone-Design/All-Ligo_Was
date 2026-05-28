@@ -47,6 +47,7 @@ app:
 server:
   port: ${SERVER_PORT:8080}
 
+
 cloud:
   aws:
     region: ${AWS_REGION}
