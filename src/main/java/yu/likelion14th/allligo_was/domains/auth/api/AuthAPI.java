@@ -72,7 +72,7 @@ public interface AuthAPI {
     ResponseEntity<?> sendVerificationEmail(
             @Valid @RequestBody EmailAddressReqDto dto);
 
-    @Operation(summary = "이메일 인증 완료", description = "인증 메일 링크의 email과 token을 검증하여 이메일 인증을 완료합니다. 인증 성공 시 프론트의 인증 완료 안내 화면으로 리다이렉트합니다.")
+    @Operation(summary = "이메일 인증 완료", description = "이메일의 인증하기 버튼을 클릭하면 호출되는 API입니다. email과 token을 검증하여 이메일 인증 완료 상태를 저장하고, 인증 성공 시 프론트엔드의 인증 완료 안내 화면으로 리다이렉트합니다. 회원가입 화면의 완료 버튼 판별은 별도의 이메일 인증 상태 확인 API를 사용합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "302", description = "이메일 인증 완료 후 프론트 인증 완료 안내 화면으로 리다이렉트"),
             @ApiResponse(responseCode = "400", description = "이메일 형식 오류 / 토큰 오류 / 인증 시간 만료", content = @Content(mediaType = "application/json", examples = {
@@ -95,7 +95,7 @@ public interface AuthAPI {
 
             @Parameter(description = "이메일 인증 토큰", example = "550e8400-e29b-41d4-a716-446655440000") @RequestParam("token") String token);
 
-    @Operation(summary = "이메일 인증 상태 확인", description = "회원가입 화면에서 완료 버튼을 눌렀을 때 해당 이메일의 인증 완료 여부를 확인합니다.")
+    @Operation(summary = "이메일 인증 상태 확인", description = "회원가입 화면에서 사용자가 완료 버튼을 눌렀을 때 해당 이메일의 인증 완료 여부를 확인합니다. verified 값이 true이면 다음 단계로 이동하고, false이면 인증 미완료 팝업을 표시합니다.")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "이메일 인증 상태 조회 성공", content = @Content(mediaType = "application/json", examples = {
                     @ExampleObject(name = "인증 완료", value = """
