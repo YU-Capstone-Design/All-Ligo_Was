@@ -60,3 +60,6 @@ cloud:
 default:
   profile:
     image-key: ${DEFAULT_PROFILE_IMAGE_KEY}
+
+web:
+  server: ${WEB_SERVER_URL:http://localhost:5173}
