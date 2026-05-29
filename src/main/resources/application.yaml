@@ -46,3 +46,17 @@ app:
 
 server:
   port: ${SERVER_PORT:8080}
+
+cloud:
+  aws:
+    credentials:
+      access-key: ${AWS_ACCESS_KEY_ID}
+      secret-key: ${AWS_SECRET_ACCESS_KEY}
+    region: ${AWS_REGION}
+    s3:
+      bucket: ${AWS_S3_BUCKET}
+      base-url: ${AWS_S3_BASE_URL}
+
+default:
+  profile:
+    image-key: ${DEFAULT_PROFILE_IMAGE_KEY}

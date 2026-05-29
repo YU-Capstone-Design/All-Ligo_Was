@@ -49,6 +49,16 @@ public class AuthService {
     @Value("${spring.mail.username}")
     private String fromEmail;
 
+    @Value("${cloud.aws.s3.base-url}")
+    private String s3BaseUrl;
+
+    @Value("${default.profile.image-key}")
+    private String defaultProfileImageKey;
+
+    private String getDefaultProfileImageUrl() {
+        return s3BaseUrl + "/" + defaultProfileImageKey;
+    }
+
     public EmailCheckResDto checkEmailDuplication(String email) {
         validateEmailFormat(email);
 
@@ -159,6 +169,7 @@ public class AuthService {
                 .latitude(dto.getLatitude())
                 .longitude(dto.getLongitude())
                 .mapUrl(dto.getMapUrl())
+                .profileImageUrl(getDefaultProfileImageUrl())
                 .createdAt(LocalDateTime.now())
                 .user(savedUser)
                 .build();
