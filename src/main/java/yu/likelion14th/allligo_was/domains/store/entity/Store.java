@@ -39,6 +39,9 @@ public class Store {
     @Column(name="map_url", nullable = false)
     private String mapUrl;
 
+    @Column(name = "profile_image_url", length = 500)
+    private String profileImageUrl;
+
     @Column(name="created_at", nullable = false)
     private LocalDateTime createdAt;
 
@@ -48,4 +51,12 @@ public class Store {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    public void updateProfile(String storeName, String mapUrl, Double latitude, Double longitude) {
+        this.storeName = storeName;
+        this.mapUrl = mapUrl;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.updatedAt = LocalDateTime.now();
+    }
 }

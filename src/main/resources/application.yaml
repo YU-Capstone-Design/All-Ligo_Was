@@ -60,4 +60,3 @@ cloud:
 default:
   profile:
     image-key: ${DEFAULT_PROFILE_IMAGE_KEY}
-
