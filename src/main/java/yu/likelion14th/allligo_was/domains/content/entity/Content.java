@@ -51,13 +51,13 @@ public class Content {
     @Column(name="poster_url")
     private String posterUrl;
 
-    @Column(name="body_text")
+    @Column(name="body_text", columnDefinition = "TEXT")
     private String bodyText;
 
 
     // 영상용 필드
 
-    @Column(name="caption")
+    @Column(name="caption", columnDefinition = "TEXT")
     private String caption;
 
     @Column(name="s3_video_url")
