@@ -39,9 +39,6 @@ public class PromotionExecution {
     @Column(name="error_message")
     private String errorMessage;
 
-    @Column(name="weather_info")
-    private String weatherInfo;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="promotion_id", nullable = false)
     private Promotion promotion;
