@@ -1,7 +1,30 @@
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Build
 .gradle/
 build/
 bin/
 out/
+target/
+dist/
+
+# Compiled
 *.class
 *.jar
+*.war
+*.ear
+
+# Environment
 .env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Generated files
+HELP.md
