@@ -65,7 +65,7 @@ public class FastapiClientService {
         }
     }
 
-    public void uploadToYoutube(yu.likelion14th.allligo_was.fastapi.dto.FastapiUploadReqDto reqDto) {
+    public yu.likelion14th.allligo_was.fastapi.dto.FastapiUploadResponseDto uploadToYoutube(yu.likelion14th.allligo_was.fastapi.dto.FastapiUploadReqDto reqDto) {
         String url = agentServerUrl + "/api/marketing/upload";
 
         HttpHeaders headers = new HttpHeaders();
@@ -76,10 +76,11 @@ public class FastapiClientService {
 
         try {
             log.info("Sending upload request to FastAPI: {}", url);
-            restTemplate.postForEntity(url, requestEntity, String.class);
+            ResponseEntity<yu.likelion14th.allligo_was.fastapi.dto.FastapiUploadResponseDto> response = restTemplate.postForEntity(url, requestEntity, yu.likelion14th.allligo_was.fastapi.dto.FastapiUploadResponseDto.class);
+            return response.getBody();
         } catch (Exception e) {
             log.error("Failed to call FastAPI upload API", e);
-            // 업로드 API가 실패하더라도 스케줄러가 중단되지 않도록 로깅만 함
+            throw new RuntimeException("Failed to call FastAPI upload API", e);
         }
     }
 

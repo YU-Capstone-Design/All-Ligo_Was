@@ -9,6 +9,7 @@ import yu.likelion14th.allligo_was.domains.promotion.entity.Promotion;
 import yu.likelion14th.allligo_was.domains.promotion.entity.PromotionSchedule;
 import yu.likelion14th.allligo_was.domains.promotion.repository.PromotionScheduleRepository;
 import yu.likelion14th.allligo_was.fastapi.dto.FastapiGenerateReqDto;
+import yu.likelion14th.allligo_was.fastapi.dto.FastapiUploadReqDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,10 +21,12 @@ public class FastapiScheduler {
 
     private final PromotionScheduleRepository scheduleRepository;
     private final FastapiClientService fastapiClientService;
+    private final yu.likelion14th.allligo_was.domains.promotion.repository.PromotionExecutionRepository executionRepository;
+    private final yu.likelion14th.allligo_was.domains.content.repository.ContentRepository contentRepository;
 
     // 매분 0초에 실행
     @Scheduled(cron = "0 * * * * *")
-    @Transactional(readOnly = true)
+    @Transactional
     public void executeTwoTrackScheduler() {
         LocalDateTime now = LocalDateTime.now().withSecond(0).withNano(0);
         LocalDateTime oneHourLater = now.plusHours(1);
@@ -37,7 +40,16 @@ public class FastapiScheduler {
         for (PromotionSchedule schedule : generateSchedules) {
             log.info("Track A: Requesting content generation for schedule ID: {}", schedule.getScheduleId());
             Promotion promotion = schedule.getPromotion();
-            
+
+            // PromotionExecution 생성 및 저장
+            yu.likelion14th.allligo_was.domains.promotion.entity.PromotionExecution execution = yu.likelion14th.allligo_was.domains.promotion.entity.PromotionExecution.builder()
+                    .executedAt(LocalDateTime.now())
+                    .status("PENDING")
+                    .promotion(promotion)
+                    .promotionSchedule(schedule)
+                    .build();
+            executionRepository.save(execution);
+
             // TODO: Promotion과 PromotionTag에서 실제 분위기태그, 해시태그 추출 (현재는 임시값 또는 기본값 처리)
             FastapiGenerateReqDto reqDto = FastapiGenerateReqDto.builder()
                     .scheduleId(schedule.getScheduleId())
@@ -52,6 +64,8 @@ public class FastapiScheduler {
                 fastapiClientService.generateContent(reqDto, null);
             } catch (Exception e) {
                 log.error("Track A generation request failed for schedule ID: {}", schedule.getScheduleId(), e);
+                execution.setStatus("FAILED");
+                executionRepository.save(execution);
             }
         }
 
@@ -62,18 +76,40 @@ public class FastapiScheduler {
         for (PromotionSchedule schedule : uploadSchedules) {
             log.info("Track B: Requesting youtube upload for schedule ID: {}", schedule.getScheduleId());
             Promotion promotion = schedule.getPromotion();
-            
-            // TODO: Webhook 등으로 저장해둔 영상 경로(localVideoPath)를 DB에서 가져와야 함
-            yu.likelion14th.allligo_was.fastapi.dto.FastapiUploadReqDto uploadReq = yu.likelion14th.allligo_was.fastapi.dto.FastapiUploadReqDto.builder()
+
+            // 스케줄에 연결된 최근 Execution 조회
+            yu.likelion14th.allligo_was.domains.promotion.entity.PromotionExecution execution = executionRepository
+                    .findFirstByPromotionScheduleOrderByExecutedAtDesc(schedule).orElse(null);
+
+            if (execution == null) {
+                log.warn("Track B: No PromotionExecution found for schedule ID: {}", schedule.getScheduleId());
+                continue;
+            }
+
+            // Execution에 연결된 Content 조회
+            yu.likelion14th.allligo_was.domains.content.entity.Content content = contentRepository
+                    .findByPromotionExecution(execution).orElse(null);
+
+            if (content == null || content.getLocalVideoPath() == null) {
+                log.warn("Track B: No Content or LocalVideoPath found for execution ID: {}", execution.getExecutionId());
+                continue;
+            }
+
+            FastapiUploadReqDto uploadReq = FastapiUploadReqDto.builder()
                     .scheduleId(schedule.getScheduleId())
-                    .localVideoPath("static/videos/shortform_임시.mp4") // 실제 경로로 변경 필요
+                    .localVideoPath(content.getLocalVideoPath())
                     .title(promotion != null ? promotion.getPrompt() : "쇼츠 제목")
                     .description("쇼츠 설명")
                     .tags(java.util.List.of("쇼츠", "마케팅"))
                     .build();
 
             try {
-                fastapiClientService.uploadToYoutube(uploadReq);
+                yu.likelion14th.allligo_was.fastapi.dto.FastapiUploadResponseDto response = fastapiClientService.uploadToYoutube(uploadReq);
+                if (response != null && "SUCCESS".equalsIgnoreCase(response.getStatus())) {
+                    content.setUploadVideoUrl(response.getYoutubeUrl());
+                    contentRepository.save(content);
+                    log.info("Track B: Upload success. YouTube URL saved: {}", response.getYoutubeUrl());
+                }
             } catch (Exception e) {
                 log.error("Track B upload request failed for schedule ID: {}", schedule.getScheduleId(), e);
             }

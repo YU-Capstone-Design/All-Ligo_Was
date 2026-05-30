@@ -30,8 +30,14 @@ public class PromotionExecution {
     @Column(name="executed_at", nullable = false)
     private LocalDateTime executedAt;
 
+    @Column(name="task_id")
+    private String taskId;
+
     @Column(name="status", nullable = false)
     private String status;
+
+    @Column(name="error_message")
+    private String errorMessage;
 
     @Column(name="weather_info")
     private String weatherInfo;
@@ -40,4 +46,19 @@ public class PromotionExecution {
     @JoinColumn(name="promotion_id", nullable = false)
     private Promotion promotion;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="schedule_id")
+    private PromotionSchedule promotionSchedule;
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public void setTaskId(String taskId) {
+        this.taskId = taskId;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
 }
