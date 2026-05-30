@@ -8,9 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FastapiContentResponseDto {
-    private String generatedText;
-    private String generatedImageUrl;
-    private String generatedVideoUrl;
-    private String targetTimeSlot;
-    private Long createdAtMillis;
+    private String taskId;
+    private String status;
+    private String message;
 }

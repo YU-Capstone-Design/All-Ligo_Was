@@ -29,7 +29,12 @@ public class FastapiScheduler {
     @Transactional
     public void executeTwoTrackScheduler() {
         LocalDateTime now = LocalDateTime.now().withSecond(0).withNano(0);
-        LocalDateTime oneHourLater = now.plusHours(1);
+        
+        // 기존 로직: 1시간 전 생성 요청 (운영용)
+        // LocalDateTime oneHourLater = now.plusHours(1);
+        
+        // 테스트 로직: 2분 전 생성 요청 (테스트용, 테스트 완료 후 위 주석 해제 및 본 줄 삭제)
+        LocalDateTime oneHourLater = now.plusMinutes(2);
 
         log.info("Two-Track Scheduler Running... now: {}, oneHourLater: {}", now, oneHourLater);
 
@@ -61,10 +66,20 @@ public class FastapiScheduler {
                     .build();
 
             try {
-                fastapiClientService.generateContent(reqDto, null);
+                yu.likelion14th.allligo_was.fastapi.dto.FastapiContentResponseDto response = fastapiClientService.generateContent(reqDto, null);
+                if (response != null && response.getTaskId() != null) {
+                    execution.setTaskId(response.getTaskId());
+                    // status is likely "PROCESSING" from response, or we keep "PENDING"
+                    if (response.getStatus() != null) {
+                        execution.setStatus(response.getStatus());
+                    }
+                    executionRepository.save(execution);
+                    log.info("Track A generation requested successfully. Task ID: {}", response.getTaskId());
+                }
             } catch (Exception e) {
                 log.error("Track A generation request failed for schedule ID: {}", schedule.getScheduleId(), e);
                 execution.setStatus("FAILED");
+                execution.setErrorMessage(e.getMessage());
                 executionRepository.save(execution);
             }
         }
@@ -107,6 +122,7 @@ public class FastapiScheduler {
                 yu.likelion14th.allligo_was.fastapi.dto.FastapiUploadResponseDto response = fastapiClientService.uploadToYoutube(uploadReq);
                 if (response != null && "SUCCESS".equalsIgnoreCase(response.getStatus())) {
                     content.setUploadVideoUrl(response.getYoutubeUrl());
+                    content.setUploadedAt(LocalDateTime.now());
                     contentRepository.save(content);
                     log.info("Track B: Upload success. YouTube URL saved: {}", response.getYoutubeUrl());
                 }

@@ -27,44 +27,43 @@ public class ContentCallbackService {
     public void processWebhook(FastapiWebhookDto dto) {
         log.info("Received webhook callback from FastAPI. TaskId: {}, Status: {}", dto.getTaskId(), dto.getStatus());
 
-        if (dto.getScheduleId() == null) {
-            log.warn("Webhook received without scheduleId. TaskId: {}", dto.getTaskId());
-            return;
+        PromotionExecution execution = null;
+        if (dto.getTaskId() != null && !dto.getTaskId().isEmpty()) {
+            execution = executionRepository.findByTaskId(dto.getTaskId()).orElse(null);
         }
 
-        Long scheduleId;
-        try {
-            scheduleId = Long.parseLong(dto.getScheduleId());
-        } catch (NumberFormatException e) {
-            log.error("Invalid scheduleId format: {}", dto.getScheduleId());
-            return;
+        // taskId로 못 찾았고 scheduleId가 있다면 기존 로직(최근 실행 건 조회)을 Fallback으로 사용
+        if (execution == null && dto.getScheduleId() != null) {
+            try {
+                Long scheduleId = Long.parseLong(dto.getScheduleId());
+                PromotionSchedule schedule = scheduleRepository.findById(scheduleId).orElse(null);
+                if (schedule != null) {
+                    execution = executionRepository.findFirstByPromotionScheduleOrderByExecutedAtDesc(schedule)
+                            .orElse(null);
+                }
+            } catch (NumberFormatException ignored) {}
         }
-
-        PromotionSchedule schedule = scheduleRepository.findById(scheduleId).orElse(null);
-        if (schedule == null) {
-            log.warn("PromotionSchedule not found for ID: {}", scheduleId);
-            return;
-        }
-
-        PromotionExecution execution = executionRepository.findFirstByPromotionScheduleOrderByExecutedAtDesc(schedule)
-                .orElse(null);
 
         if (execution == null) {
-            log.warn("No PromotionExecution found for Schedule ID: {}", scheduleId);
+            log.warn("No PromotionExecution found for Task ID: {} and Schedule ID: {}", dto.getTaskId(), dto.getScheduleId());
             return;
         }
 
         // 상태 업데이트
         execution.setStatus(dto.getStatus());
+        if ("FAILED".equalsIgnoreCase(dto.getStatus()) && dto.getError() != null) {
+            execution.setErrorMessage(dto.getError());
+        }
         executionRepository.save(execution);
 
         if ("SUCCESS".equalsIgnoreCase(dto.getStatus()) && dto.getData() != null) {
             FastapiWebhookDto.WebhookData data = dto.getData();
             
             // 기존 Content가 있는지 확인 후 없으면 생성
-            Content content = contentRepository.findByPromotionExecution(execution).orElseGet(() -> 
+            PromotionExecution finalExecution = execution;
+            Content content = contentRepository.findByPromotionExecution(execution).orElseGet(() ->
                 Content.builder()
-                    .promotionExecution(execution)
+                    .promotionExecution(finalExecution)
                     .createdAt(LocalDateTime.now())
                     .build()
             );
@@ -74,8 +73,8 @@ public class ContentCallbackService {
             content.setLocalVideoPath(data.getLocalVideoPath());
             
             // 이미지 결과도 필요하다면 (블로그 용)
-            if (data.getGeneratedImageUrl() != null && content.getImageUrl() == null) {
-                content.setImageUrl(data.getGeneratedImageUrl());
+            if (data.getGeneratedImageUrl() != null && content.getPosterUrl() == null) {
+                content.setPosterUrl(data.getGeneratedImageUrl());
             }
 
             content.setStatus("GENERATED");
