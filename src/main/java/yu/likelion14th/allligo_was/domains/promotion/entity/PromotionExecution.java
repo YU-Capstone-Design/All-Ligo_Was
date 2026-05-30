@@ -47,15 +47,4 @@ public class PromotionExecution {
     @JoinColumn(name="schedule_id")
     private PromotionSchedule promotionSchedule;
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public void setTaskId(String taskId) {
-        this.taskId = taskId;
-    }
-
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
-    }
 }
