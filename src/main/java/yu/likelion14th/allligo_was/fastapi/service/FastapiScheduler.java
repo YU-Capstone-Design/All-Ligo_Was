@@ -58,8 +58,8 @@ public class FastapiScheduler {
             // TODO: Promotion과 PromotionTag에서 실제 분위기태그, 해시태그 추출 (현재는 임시값 또는 기본값 처리)
             FastapiGenerateReqDto reqDto = FastapiGenerateReqDto.builder()
                     .scheduleId(schedule.getScheduleId())
-                    .moodTag("") // TODO: 태그 매핑
-                    .hashTag("") // TODO: 태그 매핑
+                    .moodTag("밝은, 쾌활한") // TODO: 태그 매핑 (임시로 기본값 입력)
+                    .hashTag("#마케팅 #이벤트") // TODO: 태그 매핑 (임시로 기본값 입력)
                     .prompt(promotion != null ? promotion.getPrompt() : "")
                     .uploadDay(schedule.getDayOfWeek())
                     .uploadTime(schedule.getPublishTime() != null ? schedule.getPublishTime().toLocalTime().toString() : "morning")
