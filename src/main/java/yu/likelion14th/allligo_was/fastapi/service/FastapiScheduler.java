@@ -111,7 +111,7 @@ public class FastapiScheduler {
             }
 
             FastapiUploadReqDto uploadReq = FastapiUploadReqDto.builder()
-                    .scheduleId(schedule.getScheduleId())
+                    .scheduleId(String.valueOf(schedule.getScheduleId()))
                     .localVideoPath(content.getLocalVideoPath())
                     .title(promotion != null ? promotion.getPrompt() : "쇼츠 제목")
                     .description("쇼츠 설명")

@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FastapiUploadReqDto {
-    private Long scheduleId;       // 스케줄 ID
+    private String scheduleId;       // 스케줄 ID
     private String localVideoPath; // FastAPI 서버 내의 비디오 경로 (ex: static/videos/shortform_xxx.mp4)
     private String title;          // 유튜브 영상 제목
     private String description;    // 유튜브 영상 설명
