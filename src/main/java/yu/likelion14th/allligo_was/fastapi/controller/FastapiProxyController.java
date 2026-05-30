@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import yu.likelion14th.allligo_was.fastapi.dto.FastapiContentResponseDto;
+import yu.likelion14th.allligo_was.fastapi.dto.FastapiGenerateReqDto;
 import yu.likelion14th.allligo_was.fastapi.dto.FastapiShortformResponseDto;
 import yu.likelion14th.allligo_was.fastapi.service.FastapiClientService;
 
@@ -20,14 +21,10 @@ public class FastapiProxyController {
 
     @PostMapping(value = "/generate", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<FastapiContentResponseDto> generateContent(
-            @RequestParam("tags") String tags,
-            @RequestParam("keywords") String keywords,
-            @RequestParam("timeSlot") String timeSlot,
-            @RequestParam(value = "image", required = false) MultipartFile image,
-            @RequestParam(value = "lat", required = false) Double lat,
-            @RequestParam(value = "lon", required = false) Double lon
+            @ModelAttribute FastapiGenerateReqDto reqDto,
+            @RequestParam(value = "image", required = false) MultipartFile image
     ) {
-        FastapiContentResponseDto result = fastapiClientService.generateContent(tags, keywords, timeSlot, image, lat, lon);
+        FastapiContentResponseDto result = fastapiClientService.generateContent(reqDto, image);
         return ResponseEntity.ok(result);
     }
 
