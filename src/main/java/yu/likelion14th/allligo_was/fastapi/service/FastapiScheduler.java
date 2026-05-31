@@ -13,6 +13,12 @@ import yu.likelion14th.allligo_was.fastapi.dto.FastapiUploadReqDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import yu.likelion14th.allligo_was.domains.promotion.repository.PromotionTagRepository;
+import yu.likelion14th.allligo_was.domains.store.repository.StoreRepository;
+import yu.likelion14th.allligo_was.domains.store.entity.Store;
+import yu.likelion14th.allligo_was.domains.promotion.entity.PromotionTag;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -23,6 +29,9 @@ public class FastapiScheduler {
     private final FastapiClientService fastapiClientService;
     private final yu.likelion14th.allligo_was.domains.promotion.repository.PromotionExecutionRepository executionRepository;
     private final yu.likelion14th.allligo_was.domains.content.repository.ContentRepository contentRepository;
+    private final PromotionTagRepository promotionTagRepository;
+    private final StoreRepository storeRepository;
+    private final yu.likelion14th.allligo_was.domains.promotion.repository.PromotionImageRepository promotionImageRepository;
 
     // 매분 0초에 실행
     @Scheduled(cron = "0 * * * * *")
@@ -56,17 +65,45 @@ public class FastapiScheduler {
             executionRepository.save(execution);
 
             // TODO: Promotion과 PromotionTag에서 실제 분위기태그, 해시태그 추출 (현재는 임시값 또는 기본값 처리)
-            FastapiGenerateReqDto reqDto = FastapiGenerateReqDto.builder()
-                    .scheduleId(schedule.getScheduleId())
-                    .moodTag("밝은, 쾌활한") // TODO: 태그 매핑 (임시로 기본값 입력)
-                    .hashTag("#마케팅 #이벤트") // TODO: 태그 매핑 (임시로 기본값 입력)
-                    .prompt(promotion != null ? promotion.getPrompt() : "")
-                    .uploadDay(schedule.getDayOfWeek())
-                    .uploadTime(schedule.getPublishTime() != null ? schedule.getPublishTime().toLocalTime().toString() : "morning")
-                    .build();
+            FastapiGenerateReqDto reqDto = new FastapiGenerateReqDto();
+
+            // 기본 매핑
+            reqDto.setMoodTag("밝은, 쾌활한");
+            reqDto.setHashTag("#마케팅 #이벤트");
+            reqDto.setPrompt(promotion != null ? promotion.getPrompt() : "");
+            reqDto.setUploadDay(schedule.getDayOfWeek());
+            reqDto.setUploadTime(schedule.getPublishTime() != null ? schedule.getPublishTime().toLocalTime().toString() : "morning");
+            reqDto.setScheduleId(String.valueOf(schedule.getScheduleId())); // String 변환
+
+            if (promotion != null) {
+                // 1. S3 이미지 URL 설정 (null 방어)
+                List<yu.likelion14th.allligo_was.domains.promotion.entity.PromotionImage> promotionImages = promotionImageRepository.findAllByPromotion(promotion);
+                List<String> urls = promotionImages != null ? promotionImages.stream().map(yu.likelion14th.allligo_was.domains.promotion.entity.PromotionImage::getImageUrl).collect(Collectors.toList()) : new ArrayList<>();
+                reqDto.setImageUrls(urls != null && !urls.isEmpty() ? urls : new ArrayList<>());
+
+                // 2. contentType Null 방어 및 기본값 매핑
+                String dbContentType = promotion.getContentType();
+                if (dbContentType == null || dbContentType.isBlank()) {
+                    reqDto.setContentType("IMAGE");
+                } else {
+                    reqDto.setContentType(dbContentType.toUpperCase().trim());
+                }
+
+                // 3. mode Null 방어 및 기본값 매핑
+                String dbMode = promotion.getMode();
+                if (dbMode == null || dbMode.isBlank()) {
+                    reqDto.setMode("TRANSFORM");
+                } else {
+                    reqDto.setMode(dbMode.toUpperCase().trim());
+                }
+            } else {
+                reqDto.setImageUrls(new ArrayList<>());
+                reqDto.setContentType("IMAGE");
+                reqDto.setMode("TRANSFORM");
+            }
 
             try {
-                yu.likelion14th.allligo_was.fastapi.dto.FastapiContentResponseDto response = fastapiClientService.generateContent(reqDto, null);
+                yu.likelion14th.allligo_was.fastapi.dto.FastapiContentResponseDto response = fastapiClientService.generateContent(reqDto);
                 if (response != null && response.getTaskId() != null) {
                     execution.setTaskId(response.getTaskId());
                     // status is likely "PROCESSING" from response, or we keep "PENDING"
@@ -110,12 +147,60 @@ public class FastapiScheduler {
                 continue;
             }
 
+            // 1. 태그 추출
+            List<String> tags = new ArrayList<>();
+            if (promotion != null) {
+                List<PromotionTag> promotionTags = promotionTagRepository.findAllByPromotion(promotion);
+                if (promotionTags != null && !promotionTags.isEmpty()) {
+                    tags = promotionTags.stream()
+                            .map(PromotionTag::getTagName)
+                            .collect(Collectors.toList());
+                }
+            }
+
+            // 2. Description (generatedText) 추출
+            String generatedText = "";
+            if (content.getCaption() != null && !content.getCaption().isBlank()) {
+                generatedText = content.getCaption();
+            } else if (content.getBodyText() != null && !content.getBodyText().isBlank()) {
+                generatedText = content.getBodyText();
+            }
+            String description = generatedText;
+
+            // 3. Title 추출
+            String title = "";
+            if (!generatedText.isBlank()) {
+                // 첫 번째 줄이나 문장을 추출
+                String firstSentence = generatedText.split("\n|\\.")[0].trim();
+                if (firstSentence.length() > 50) {
+                    title = firstSentence.substring(0, 50);
+                } else {
+                    title = firstSentence;
+                }
+            }
+
+            // 생성된 텍스트가 없거나 유효한 문장이 없을 경우 매장명 기반 고정 포맷 적용
+            if (title.isBlank()) {
+                String storeName = "매장";
+                if (promotion != null && promotion.getUser() != null) {
+                    Store store = storeRepository.findByUser(promotion.getUser()).orElse(null);
+                    if (store != null) {
+                        storeName = store.getStoreName();
+                    }
+                }
+                title = storeName + " 추천 쇼츠 영상";
+                // 최대 100자 보장
+                if (title.length() > 100) {
+                    title = title.substring(0, 100);
+                }
+            }
+
             FastapiUploadReqDto uploadReq = FastapiUploadReqDto.builder()
                     .scheduleId(String.valueOf(schedule.getScheduleId()))
                     .localVideoPath(content.getLocalVideoPath())
-                    .title(promotion != null ? promotion.getPrompt() : "쇼츠 제목")
-                    .description("쇼츠 설명")
-                    .tags(java.util.List.of("쇼츠", "마케팅"))
+                    .title(title)
+                    .description(description)
+                    .tags(tags)
                     .build();
 
             try {

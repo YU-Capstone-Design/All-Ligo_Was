@@ -34,7 +34,8 @@ public class FastapiProxyController {
             }
         }
 
-        FastapiContentResponseDto result = fastapiClientService.generateContent(reqDto, images);
+        // TODO: S3 업로드 로직 추가 및 reqDto.setImageUrls(업로드된_URL_리스트) 설정 필요
+        FastapiContentResponseDto result = fastapiClientService.generateContent(reqDto);
         return ResponseEntity.ok(result);
     }
 

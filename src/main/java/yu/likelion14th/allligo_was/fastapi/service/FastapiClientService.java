@@ -10,10 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.multipart.MultipartFile;
 import yu.likelion14th.allligo_was.fastapi.dto.FastapiContentResponseDto;
 import yu.likelion14th.allligo_was.fastapi.dto.FastapiContentResponseDto;
 
@@ -30,36 +27,13 @@ public class FastapiClientService {
     @Value("${agent.server.url:http://localhost:8000}")
     private String agentServerUrl;
 
-    public FastapiContentResponseDto generateContent(yu.likelion14th.allligo_was.fastapi.dto.FastapiGenerateReqDto reqDto, List<MultipartFile> images) {
+    public FastapiContentResponseDto generateContent(yu.likelion14th.allligo_was.fastapi.dto.FastapiGenerateReqDto reqDto) {
         String url = agentServerUrl + "/api/marketing/generate";
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        
-        // 변경된 Agent API 요구사항에 맞게 변환
-        if (reqDto.getScheduleId() != null) body.add("scheduleId", reqDto.getScheduleId().toString());
-        body.add("contentType", reqDto.getContentType() != null ? reqDto.getContentType() : "POST");
-        body.add("mode", reqDto.getMode() != null ? reqDto.getMode() : "TRANSFORM");
-        body.add("moodTag", reqDto.getMoodTag() != null ? reqDto.getMoodTag() : "");
-        body.add("hashTag", reqDto.getHashTag() != null ? reqDto.getHashTag() : "");
-        body.add("prompt", reqDto.getPrompt() != null ? reqDto.getPrompt() : "");
-        body.add("uploadDay", reqDto.getUploadDay() != null ? reqDto.getUploadDay() : "");
-        body.add("uploadTime", reqDto.getUploadTime() != null ? reqDto.getUploadTime() : "");
-        
-        if (reqDto.getLat() != null) body.add("lat", reqDto.getLat());
-        if (reqDto.getLon() != null) body.add("lon", reqDto.getLon());
-        
-        if (images != null) {
-            for (MultipartFile file : images) {
-                if (!file.isEmpty()) {
-                    body.add("images", createResource(file));
-                }
-            }
-        }
-
-        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+        HttpEntity<yu.likelion14th.allligo_was.fastapi.dto.FastapiGenerateReqDto> requestEntity = new HttpEntity<>(reqDto, headers);
 
         try {
             log.info("Sending request to FastAPI: {}", url);
@@ -90,18 +64,4 @@ public class FastapiClientService {
         }
     }
 
-
-
-    private Resource createResource(MultipartFile file) {
-        try {
-            return new ByteArrayResource(file.getBytes()) {
-                @Override
-                public String getFilename() {
-                    return file.getOriginalFilename() != null ? file.getOriginalFilename() : "file";
-                }
-            };
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read file", e);
-        }
-    }
 }
