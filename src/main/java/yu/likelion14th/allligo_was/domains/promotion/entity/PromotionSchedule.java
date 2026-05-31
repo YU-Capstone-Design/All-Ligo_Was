@@ -32,9 +32,6 @@ public class PromotionSchedule {
     @Column(name="publish_time")
     private LocalDateTime publishTime;
 
-    @Column(name="deadline")
-    private LocalDateTime deadline;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "promotion_id", nullable = false)
     private Promotion promotion;
