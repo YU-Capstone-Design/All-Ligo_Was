@@ -18,4 +18,6 @@ public class FastapiGenerateReqDto {
     private Long scheduleId;      // 스케줄 ID (Webhook 반환용)
     private Double lat;           // (선택) 위도
     private Double lon;           // (선택) 경도
+    private String contentType;   // "POST" (블로그/인스타) 또는 "VIDEO" (숏폼 영상)
+    private String mode;          // "TRANSFORM" (AI 변형) 또는 "ORIGINAL" (원본 유지)
 }

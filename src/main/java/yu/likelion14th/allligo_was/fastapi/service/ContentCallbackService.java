@@ -68,13 +68,20 @@ public class ContentCallbackService {
                     .build()
             );
 
-            content.setBodyText(data.getGeneratedText());
-            content.setS3VideoUrl(data.getS3VideoUrl());
-            content.setLocalVideoPath(data.getLocalVideoPath());
-            
-            // 이미지 결과도 필요하다면 (블로그 용)
-            if (data.getGeneratedImageUrl() != null && content.getPosterUrl() == null) {
-                content.setPosterUrl(data.getGeneratedImageUrl());
+            // 1. contentType에 따른 텍스트 분기 처리
+            if ("POST".equalsIgnoreCase(data.getContentType())) {
+                content.setBodyText(data.getGeneratedText()); // 긴 글은 bodyText에 저장
+            } else if ("VIDEO".equalsIgnoreCase(data.getContentType())) {
+                content.setCaption(data.getGeneratedText());  // 짧은 영상 자막은 caption에 저장
+            }
+
+            // 2. 미디어 URL 처리
+            if (data.getPosterUrl() != null) {
+                content.setPosterUrl(data.getPosterUrl()); // 명칭 변경된 필드 적용
+            }
+            if (data.getS3VideoUrl() != null) {
+                content.setS3VideoUrl(data.getS3VideoUrl());
+                content.setLocalVideoPath(data.getLocalVideoPath());
             }
 
             content.setStatus("GENERATED");
