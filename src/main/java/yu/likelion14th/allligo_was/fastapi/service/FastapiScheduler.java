@@ -123,6 +123,7 @@ public class FastapiScheduler {
                 if (response != null && "SUCCESS".equalsIgnoreCase(response.getStatus())) {
                     content.setUploadVideoUrl(response.getYoutubeUrl());
                     content.setUploadedAt(LocalDateTime.now());
+                    content.setStatus("PUBLISHED");
                     contentRepository.save(content);
                     log.info("Track B: Upload success. YouTube URL saved: {}", response.getYoutubeUrl());
                 }
