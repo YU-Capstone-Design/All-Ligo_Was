@@ -84,7 +84,7 @@ public class FastapiScheduler {
                 // 2. contentType Null 방어 및 기본값 매핑
                 String dbContentType = promotion.getContentType();
                 if (dbContentType == null || dbContentType.isBlank()) {
-                    reqDto.setContentType("IMAGE");
+                    reqDto.setContentType("POST");
                 } else {
                     reqDto.setContentType(dbContentType.toUpperCase().trim());
                 }
