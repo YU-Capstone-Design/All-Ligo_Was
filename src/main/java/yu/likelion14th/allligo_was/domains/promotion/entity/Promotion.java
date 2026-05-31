@@ -44,6 +44,9 @@ public class Promotion {
     @Column(name="updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name="deadline")
+    private LocalDateTime deadline;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
