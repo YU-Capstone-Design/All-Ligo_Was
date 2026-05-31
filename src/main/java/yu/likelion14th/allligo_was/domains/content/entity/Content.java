@@ -33,6 +33,7 @@ public class Content {
 
     // 공통 필드
 
+    // 상태값: GENERATED (콘텐츠 생성 완료), PUBLISHED (플랫폼 업로드/발행 완료), CANCELLED (예약 취소)
     @Column(name="status")
     private String status;
 

@@ -22,9 +22,11 @@ public class FastapiWebhookDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class WebhookData {
+        private String contentType; // 새로 추가됨
+        private String mode;        // 새로 추가됨
         private String scheduleId;
         private String generatedText;
-        private String generatedImageUrl;
+        private String posterUrl;   // 기존 generatedImageUrl -> posterUrl 로 명칭 통일됨
         private String generatedVideoUrl;
         private String s3VideoUrl;
         private String localVideoPath;

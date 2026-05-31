@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import yu.likelion14th.allligo_was.fastapi.dto.FastapiContentResponseDto;
 import yu.likelion14th.allligo_was.fastapi.dto.FastapiGenerateReqDto;
-import yu.likelion14th.allligo_was.fastapi.dto.FastapiShortformResponseDto;
+
 import yu.likelion14th.allligo_was.fastapi.service.FastapiClientService;
 
 import java.util.List;
@@ -22,19 +22,20 @@ public class FastapiProxyController {
     @PostMapping(value = "/generate", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<FastapiContentResponseDto> generateContent(
             @ModelAttribute FastapiGenerateReqDto reqDto,
-            @RequestParam(value = "image", required = false) MultipartFile image
+            @RequestParam(value = "images", required = true) List<MultipartFile> images
     ) {
-        FastapiContentResponseDto result = fastapiClientService.generateContent(reqDto, image);
+        if (images == null || images.isEmpty() || images.size() > 5) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        for (MultipartFile img : images) {
+            if (img.isEmpty()) {
+                return ResponseEntity.badRequest().build();
+            }
+        }
+
+        FastapiContentResponseDto result = fastapiClientService.generateContent(reqDto, images);
         return ResponseEntity.ok(result);
     }
 
-    @PostMapping(value = "/shortform", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<FastapiShortformResponseDto> createShortform(
-            @RequestParam("images") List<MultipartFile> images,
-            @RequestParam("text") String text,
-            @RequestParam(value = "secondsPerImage", required = false, defaultValue = "3.0") Double secondsPerImage
-    ) {
-        FastapiShortformResponseDto result = fastapiClientService.createShortform(images, text, secondsPerImage);
-        return ResponseEntity.ok(result);
-    }
 }
