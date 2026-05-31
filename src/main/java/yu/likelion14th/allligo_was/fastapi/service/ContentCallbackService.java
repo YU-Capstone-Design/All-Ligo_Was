@@ -65,6 +65,7 @@ public class ContentCallbackService {
                 Content.builder()
                     .promotionExecution(finalExecution)
                     .createdAt(LocalDateTime.now())
+                    .contentType(data.getContentType())
                     .build()
             );
 
