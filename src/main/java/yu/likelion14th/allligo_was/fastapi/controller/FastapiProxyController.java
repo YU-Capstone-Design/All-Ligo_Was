@@ -22,9 +22,19 @@ public class FastapiProxyController {
     @PostMapping(value = "/generate", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<FastapiContentResponseDto> generateContent(
             @ModelAttribute FastapiGenerateReqDto reqDto,
-            @RequestParam(value = "image", required = false) MultipartFile image
+            @RequestParam(value = "images", required = true) List<MultipartFile> images
     ) {
-        FastapiContentResponseDto result = fastapiClientService.generateContent(reqDto, image);
+        if (images == null || images.isEmpty() || images.size() > 5) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        for (MultipartFile img : images) {
+            if (img.isEmpty()) {
+                return ResponseEntity.badRequest().build();
+            }
+        }
+
+        FastapiContentResponseDto result = fastapiClientService.generateContent(reqDto, images);
         return ResponseEntity.ok(result);
     }
 

@@ -30,7 +30,7 @@ public class FastapiClientService {
     @Value("${agent.server.url:http://localhost:8000}")
     private String agentServerUrl;
 
-    public FastapiContentResponseDto generateContent(yu.likelion14th.allligo_was.fastapi.dto.FastapiGenerateReqDto reqDto, MultipartFile image) {
+    public FastapiContentResponseDto generateContent(yu.likelion14th.allligo_was.fastapi.dto.FastapiGenerateReqDto reqDto, List<MultipartFile> images) {
         String url = agentServerUrl + "/api/marketing/generate";
 
         HttpHeaders headers = new HttpHeaders();
@@ -51,8 +51,12 @@ public class FastapiClientService {
         if (reqDto.getLat() != null) body.add("lat", reqDto.getLat());
         if (reqDto.getLon() != null) body.add("lon", reqDto.getLon());
         
-        if (image != null && !image.isEmpty()) {
-            body.add("image", createResource(image));
+        if (images != null) {
+            for (MultipartFile file : images) {
+                if (!file.isEmpty()) {
+                    body.add("images", createResource(file));
+                }
+            }
         }
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
