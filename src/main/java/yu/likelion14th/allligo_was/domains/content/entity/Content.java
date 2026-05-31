@@ -13,6 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.validator.constraints.br.CPF;
 import yu.likelion14th.allligo_was.domains.promotion.entity.PromotionExecution;
 
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -29,14 +31,7 @@ public class Content {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long contentId;
 
-    @Column(name="body_text")
-    private String bodyText;
-
-    @Column(name="caption")
-    private String caption;
-
-    @Column(name="file_url")
-    private String fileUrl;
+    // 공통 필드
 
     @Column(name="status")
     private String status;
@@ -47,8 +42,34 @@ public class Content {
     @Column(name="expires_at")
     private LocalDateTime expiresAt;
 
+    @Column(name="uploaded_at")
+    private LocalDateTime uploadedAt;
+
+    // 포스트용 필드
+
+
+    @Column(name="poster_url")
+    private String posterUrl;
+
+    @Column(name="body_text", columnDefinition = "TEXT")
+    private String bodyText;
+
+
+    // 영상용 필드
+
+    @Column(name="caption", columnDefinition = "TEXT")
+    private String caption;
+
+    @Column(name="s3_video_url")
+    private String s3VideoUrl;
+
+    @Column(name="local_video_path")
+    private String localVideoPath;
+
+    @Column(name="upload_video_url")
+    private String uploadVideoUrl;
+
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "execution_id", nullable = false)
     private PromotionExecution promotionExecution;
-
 }

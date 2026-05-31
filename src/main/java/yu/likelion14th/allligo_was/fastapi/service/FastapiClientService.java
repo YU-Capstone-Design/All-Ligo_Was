@@ -30,23 +30,24 @@ public class FastapiClientService {
     @Value("${agent.server.url:http://localhost:8000}")
     private String agentServerUrl;
 
-    public FastapiContentResponseDto generateContent(String tags, String keywords, String timeSlot, MultipartFile image, Double lat, Double lon) {
+    public FastapiContentResponseDto generateContent(yu.likelion14th.allligo_was.fastapi.dto.FastapiGenerateReqDto reqDto, MultipartFile image) {
         String url = agentServerUrl + "/api/marketing/generate";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("tags", tags);
-        body.add("keywords", keywords);
-        body.add("timeSlot", timeSlot);
         
-        if (lat != null) {
-            body.add("lat", lat);
-        }
-        if (lon != null) {
-            body.add("lon", lon);
-        }
+        // 변경된 Agent API 요구사항에 맞게 변환
+        if (reqDto.getScheduleId() != null) body.add("scheduleId", reqDto.getScheduleId().toString());
+        body.add("moodTag", reqDto.getMoodTag() != null ? reqDto.getMoodTag() : "");
+        body.add("hashTag", reqDto.getHashTag() != null ? reqDto.getHashTag() : "");
+        body.add("prompt", reqDto.getPrompt() != null ? reqDto.getPrompt() : "");
+        body.add("uploadDay", reqDto.getUploadDay() != null ? reqDto.getUploadDay() : "");
+        body.add("uploadTime", reqDto.getUploadTime() != null ? reqDto.getUploadTime() : "");
+        
+        if (reqDto.getLat() != null) body.add("lat", reqDto.getLat());
+        if (reqDto.getLon() != null) body.add("lon", reqDto.getLon());
         
         if (image != null && !image.isEmpty()) {
             body.add("image", createResource(image));
@@ -61,6 +62,25 @@ public class FastapiClientService {
         } catch (Exception e) {
             log.error("Failed to call FastAPI generateContent API", e);
             throw new RuntimeException("Failed to call FastAPI", e);
+        }
+    }
+
+    public yu.likelion14th.allligo_was.fastapi.dto.FastapiUploadResponseDto uploadToYoutube(yu.likelion14th.allligo_was.fastapi.dto.FastapiUploadReqDto reqDto) {
+        String url = agentServerUrl + "/api/marketing/upload";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        // FastapiUploadReqDto를 JSON 형태로 직접 전송
+        HttpEntity<yu.likelion14th.allligo_was.fastapi.dto.FastapiUploadReqDto> requestEntity = new HttpEntity<>(reqDto, headers);
+
+        try {
+            log.info("Sending upload request to FastAPI: {}", url);
+            ResponseEntity<yu.likelion14th.allligo_was.fastapi.dto.FastapiUploadResponseDto> response = restTemplate.postForEntity(url, requestEntity, yu.likelion14th.allligo_was.fastapi.dto.FastapiUploadResponseDto.class);
+            return response.getBody();
+        } catch (Exception e) {
+            log.error("Failed to call FastAPI upload API", e);
+            throw new RuntimeException("Failed to call FastAPI upload API", e);
         }
     }
 
