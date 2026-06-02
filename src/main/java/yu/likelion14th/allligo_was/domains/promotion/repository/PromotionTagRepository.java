@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface PromotionTagRepository extends JpaRepository<PromotionTag, Long> {
     List<PromotionTag> findAllByPromotion(Promotion promotion);
+    List<PromotionTag> findAllByPromotionPromotionId(Long promotionId);
+    void deleteAllByPromotionPromotionId(Long promotionId);
 }

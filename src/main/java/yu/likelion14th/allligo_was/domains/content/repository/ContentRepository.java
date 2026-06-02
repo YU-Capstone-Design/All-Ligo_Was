@@ -7,4 +7,5 @@ import yu.likelion14th.allligo_was.domains.promotion.entity.PromotionExecution;
 
 public interface ContentRepository extends JpaRepository<Content, Long> {
     Optional<Content> findByPromotionExecution(PromotionExecution execution);
+    void deleteAllByPromotionExecutionPromotionPromotionId(Long promotionId);
 }
