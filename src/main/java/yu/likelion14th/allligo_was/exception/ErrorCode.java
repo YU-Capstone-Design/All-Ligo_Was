@@ -29,7 +29,9 @@ public enum ErrorCode {
     INVALID_LINK(HttpStatus.BAD_REQUEST, "링크가 유효하지 않습니다."),
 
     INVALID_COUPON_IMAGE_URL(HttpStatus.BAD_REQUEST, "쿠폰 이미지 URL이 유효하지 않습니다."),
-    
+    COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, "쿠폰을 찾을 수 없습니다."),
+    FORBIDDEN_COUPON_ACCESS(HttpStatus.FORBIDDEN, "해당 쿠폰에 접근할 수 없습니다."),
+
     INVALID_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다.");
 
