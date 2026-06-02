@@ -15,6 +15,7 @@ import yu.likelion14th.allligo_was.domains.promotion.dto.request.PromotionCreate
 import yu.likelion14th.allligo_was.domains.promotion.dto.request.PromotionUpdateReqDto;
 import yu.likelion14th.allligo_was.domains.promotion.dto.response.PromotionDetailResDto;
 import yu.likelion14th.allligo_was.domains.promotion.dto.response.PromotionListResDto;
+import yu.likelion14th.allligo_was.domains.promotion.dto.response.PromotionScheduleQueueResDto;
 
 import java.util.List;
 
@@ -268,4 +269,92 @@ public interface PromotionAPI {
             @Parameter(description = "삭제할 홍보 요청 ID", example = "1")
             @PathVariable Long promotionId
     );
+
+    @Operation(
+            summary = "스케줄링 대기열 조회",
+            description = """
+                    로그인한 소상공인의 24시간 이내 콘텐츠 스케줄링 대기열을 조회합니다.
+                    
+                    PromotionExecution 상태가 PENDING이면 대기중,
+                    PROCESSING이면 생성중,
+                    FAILED이면 실패로 응답합니다.
+                    
+                    PromotionExecution 상태가 SUCCESS인 경우에는 연결된 Content 상태를 확인합니다.
+                    Content 상태가 GENERATED인 경우에만 생성 완료 항목으로 응답합니다.
+                    
+                    Content 상태가 PUBLISHED 또는 CANCELLED인 콘텐츠는 대기열에서 제외됩니다.
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "스케줄링 대기열 조회 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(
+                                    value = """
+                                            [
+                                              {
+                                                "executionId": 1,
+                                                "promotionId": 3,
+                                                "contentId": null,
+                                                "promotionTitle": "비오는날커피홍보",
+                                                "contentType": "VIDEO",
+                                                "contentTypeLabel": "영상",
+                                                "status": "PENDING",
+                                                "statusLabel": "대기중",
+                                                "executedAt": "2026-06-02T23:30:00",
+                                                "createdAt": null,
+                                                "expiresAt": null,
+                                                "clickable": false
+                                              },
+                                              {
+                                                "executionId": 2,
+                                                "promotionId": 3,
+                                                "contentId": null,
+                                                "promotionTitle": "비오는날커피홍보",
+                                                "contentType": "VIDEO",
+                                                "contentTypeLabel": "영상",
+                                                "status": "PROCESSING",
+                                                "statusLabel": "생성중",
+                                                "executedAt": "2026-06-03T01:30:00",
+                                                "createdAt": null,
+                                                "expiresAt": null,
+                                                "clickable": false
+                                              },
+                                              {
+                                                "executionId": 3,
+                                                "promotionId": 3,
+                                                "contentId": null,
+                                                "promotionTitle": "비오는날커피홍보",
+                                                "contentType": "VIDEO",
+                                                "contentTypeLabel": "영상",
+                                                "status": "FAILED",
+                                                "statusLabel": "실패",
+                                                "executedAt": "2026-06-03T03:30:00",
+                                                "createdAt": null,
+                                                "expiresAt": null,
+                                                "clickable": false
+                                              },
+                                              {
+                                                "executionId": 4,
+                                                "promotionId": 3,
+                                                "contentId": 5,
+                                                "promotionTitle": "비오는날커피홍보",
+                                                "contentType": "VIDEO",
+                                                "contentTypeLabel": "영상",
+                                                "status": "GENERATED",
+                                                "statusLabel": "생성 완료",
+                                                "executedAt": "2026-06-03T05:30:00",
+                                                "createdAt": "2026-06-02T21:30:00",
+                                                "expiresAt": "2026-06-03T21:30:00",
+                                                "clickable": true
+                                              }
+                                            ]
+                                            """
+                            )
+                    )
+            )
+    })
+    ResponseEntity<List<PromotionScheduleQueueResDto>> getScheduleQueue();
 }
