@@ -18,149 +18,170 @@ import yu.likelion14th.allligo_was.domains.auth.dto.request.LoginReqDto;
 @Tag(name = "Auth API", description = "회원가입, 로그인, 이메일 인증 관련 API입니다.")
 public interface AuthAPI {
 
-    @Operation(summary = "이메일 중복 확인", description = "회원가입 시 입력한 이메일의 형식을 검증하고, 이미 등록된 이메일인지 확인합니다.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "사용 가능한 이메일", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                    {
-                      "available": true,
-                      "message": "사용 가능한 이메일입니다."
-                    }
-                    """))),
-            @ApiResponse(responseCode = "400", description = "이메일 형식 오류", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                    {
-                      "status": 400,
-                      "message": "이메일 형식을 맞추어 작성해주세요."
-                    }
-                    """))),
-            @ApiResponse(responseCode = "409", description = "이미 등록된 이메일", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                    {
-                      "status": 409,
-                      "message": "이미 등록된 메일은 사용할 수 없어요."
-                    }
-                    """)))
-    })
-    ResponseEntity<?> checkEmail(
-            @Parameter(description = "중복 확인할 이메일", example = "test@example.com") @RequestParam("email") String email);
+        @Operation(summary = "이메일 중복 확인", description = "회원가입 시 입력한 이메일의 형식을 검증하고, 이미 등록된 이메일인지 확인합니다.")
+        @ApiResponses({
+                        @ApiResponse(responseCode = "200", description = "사용 가능한 이메일", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                                        {
+                                          "available": true,
+                                          "message": "사용 가능한 이메일입니다."
+                                        }
+                                        """))),
+                        @ApiResponse(responseCode = "400", description = "이메일 형식 오류", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                                        {
+                                          "status": 400,
+                                          "message": "이메일 형식을 맞추어 작성해주세요."
+                                        }
+                                        """))),
+                        @ApiResponse(responseCode = "409", description = "이미 등록된 이메일", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                                        {
+                                          "status": 409,
+                                          "message": "이미 등록된 메일은 사용할 수 없어요."
+                                        }
+                                        """)))
+        })
+        ResponseEntity<?> checkEmail(
+                        @Parameter(description = "중복 확인할 이메일", example = "test@example.com") @RequestParam("email") String email);
 
-    @Operation(summary = "이메일 인증 메일 발송", description = "회원가입 시 입력한 이메일로 인증 메일을 발송합니다. 메일의 인증하기 버튼은 백엔드 인증 API를 호출하며, 인증 링크는 5분 동안 유효합니다.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "인증 메일 발송 성공", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                    {
-                      "message": "인증 메일이 발송되었습니다.",
-                      "expiresInMinutes": 5
-                    }
-                    """))),
-            @ApiResponse(responseCode = "400", description = "이메일 형식 오류", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                    {
-                      "status": 400,
-                      "message": "이메일 형식을 맞추어 작성해주세요."
-                    }
-                    """))),
-            @ApiResponse(responseCode = "409", description = "이미 등록된 이메일", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                    {
-                      "status": 409,
-                      "message": "이미 등록된 메일은 사용할 수 없어요."
-                    }
-                    """))),
-            @ApiResponse(responseCode = "500", description = "인증 메일 발송 실패", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                    {
-                      "status": 500,
-                      "message": "인증 메일 발송에 실패했습니다."
-                    }
-                    """)))
-    })
-    ResponseEntity<?> sendVerificationEmail(
-            @Valid @RequestBody EmailAddressReqDto dto);
+        @Operation(summary = "이메일 인증 메일 발송", description = "회원가입 시 입력한 이메일로 인증 메일을 발송합니다. 메일의 인증하기 버튼은 백엔드 인증 API를 호출하며, 인증 링크는 5분 동안 유효합니다.")
+        @ApiResponses({
+                        @ApiResponse(responseCode = "200", description = "인증 메일 발송 성공", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                                        {
+                                          "message": "인증 메일이 발송되었습니다.",
+                                          "expiresInMinutes": 5
+                                        }
+                                        """))),
+                        @ApiResponse(responseCode = "400", description = "이메일 형식 오류", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                                        {
+                                          "status": 400,
+                                          "message": "이메일 형식을 맞추어 작성해주세요."
+                                        }
+                                        """))),
+                        @ApiResponse(responseCode = "409", description = "이미 등록된 이메일", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                                        {
+                                          "status": 409,
+                                          "message": "이미 등록된 메일은 사용할 수 없어요."
+                                        }
+                                        """))),
+                        @ApiResponse(responseCode = "500", description = "인증 메일 발송 실패", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                                        {
+                                          "status": 500,
+                                          "message": "인증 메일 발송에 실패했습니다."
+                                        }
+                                        """)))
+        })
+        ResponseEntity<?> sendVerificationEmail(
+                        @Valid @RequestBody EmailAddressReqDto dto);
 
-    @Operation(summary = "이메일 인증 완료", description = "이메일의 인증하기 버튼을 클릭하면 호출되는 API입니다. email과 token을 검증하여 이메일 인증 완료 상태를 저장하고, 인증 성공 시 프론트엔드의 인증 완료 안내 화면으로 리다이렉트합니다. 회원가입 화면의 완료 버튼 판별은 별도의 이메일 인증 상태 확인 API를 사용합니다.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "302", description = "이메일 인증 완료 후 프론트 인증 완료 안내 화면으로 리다이렉트"),
-            @ApiResponse(responseCode = "400", description = "이메일 형식 오류 / 토큰 오류 / 인증 시간 만료", content = @Content(mediaType = "application/json", examples = {
-                    @ExampleObject(name = "토큰 오류", value = """
-                            {
-                              "status": 400,
-                              "message": "인증 토큰이 올바르지 않습니다."
-                            }
-                            """),
-                    @ExampleObject(name = "인증 시간 만료", value = """
-                            {
-                              "status": 400,
-                              "message": "인증 시간이 만료되었습니다."
-                            }
-                            """)
-            }))
-    })
-    ResponseEntity<Void> verifyEmail(
-            @Parameter(description = "인증할 이메일", example = "test@example.com") @RequestParam("email") String email,
+        @Operation(summary = "이메일 인증 완료", description = "이메일의 인증하기 버튼을 클릭하면 호출되는 API입니다. email과 token을 검증하여 이메일 인증 완료 상태를 저장하고, 인증 성공 시 프론트엔드의 인증 완료 안내 화면으로 리다이렉트합니다. 회원가입 화면의 완료 버튼 판별은 별도의 이메일 인증 상태 확인 API를 사용합니다.")
+        @ApiResponses({
+                        @ApiResponse(responseCode = "302", description = "이메일 인증 완료 후 프론트 인증 완료 안내 화면으로 리다이렉트"),
+                        @ApiResponse(responseCode = "400", description = "이메일 형식 오류 / 토큰 오류 / 인증 시간 만료", content = @Content(mediaType = "application/json", examples = {
+                                        @ExampleObject(name = "토큰 오류", value = """
+                                                        {
+                                                          "status": 400,
+                                                          "message": "인증 토큰이 올바르지 않습니다."
+                                                        }
+                                                        """),
+                                        @ExampleObject(name = "인증 시간 만료", value = """
+                                                        {
+                                                          "status": 400,
+                                                          "message": "인증 시간이 만료되었습니다."
+                                                        }
+                                                        """)
+                        }))
+        })
+        ResponseEntity<Void> verifyEmail(
+                        @Parameter(description = "인증할 이메일", example = "test@example.com") @RequestParam("email") String email,
 
-            @Parameter(description = "이메일 인증 토큰", example = "550e8400-e29b-41d4-a716-446655440000") @RequestParam("token") String token);
+                        @Parameter(description = "이메일 인증 토큰", example = "550e8400-e29b-41d4-a716-446655440000") @RequestParam("token") String token);
 
-    @Operation(summary = "이메일 인증 상태 확인", description = "회원가입 화면에서 사용자가 완료 버튼을 눌렀을 때 해당 이메일의 인증 완료 여부를 확인합니다. verified 값이 true이면 다음 단계로 이동하고, false이면 인증 미완료 팝업을 표시합니다.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "이메일 인증 상태 조회 성공", content = @Content(mediaType = "application/json", examples = {
-                    @ExampleObject(name = "인증 완료", value = """
-                            {
-                              "email": "test@example.com",
-                              "verified": true
-                            }
-                            """),
-                    @ExampleObject(name = "인증 미완료", value = """
-                            {
-                              "email": "test@example.com",
-                              "verified": false
-                            }
-                            """)
-            })),
-            @ApiResponse(responseCode = "400", description = "이메일 형식 오류", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                    {
-                      "status": 400,
-                      "message": "이메일 형식을 맞추어 작성해주세요."
-                    }
-                    """))),
-            @ApiResponse(responseCode = "404", description = "해당 이메일 인증 정보 없음", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                    {
-                      "status": 404,
-                      "message": "해당 이메일 인증 정보를 찾을 수 없습니다."
-                    }
-                    """)))
-    })
-    ResponseEntity<?> getEmailVerificationStatus(
-            @Parameter(description = "인증 상태를 확인할 이메일", example = "test@example.com") @RequestParam("email") String email);
+        @Operation(summary = "이메일 인증 상태 확인", description = "회원가입 화면에서 사용자가 완료 버튼을 눌렀을 때 해당 이메일의 인증 완료 여부를 확인합니다. verified 값이 true이면 다음 단계로 이동하고, false이면 인증 미완료 팝업을 표시합니다.")
+        @ApiResponses({
+                        @ApiResponse(responseCode = "200", description = "이메일 인증 상태 조회 성공", content = @Content(mediaType = "application/json", examples = {
+                                        @ExampleObject(name = "인증 완료", value = """
+                                                        {
+                                                          "email": "test@example.com",
+                                                          "verified": true
+                                                        }
+                                                        """),
+                                        @ExampleObject(name = "인증 미완료", value = """
+                                                        {
+                                                          "email": "test@example.com",
+                                                          "verified": false
+                                                        }
+                                                        """)
+                        })),
+                        @ApiResponse(responseCode = "400", description = "이메일 형식 오류", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                                        {
+                                          "status": 400,
+                                          "message": "이메일 형식을 맞추어 작성해주세요."
+                                        }
+                                        """))),
+                        @ApiResponse(responseCode = "404", description = "해당 이메일 인증 정보 없음", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                                        {
+                                          "status": 404,
+                                          "message": "해당 이메일 인증 정보를 찾을 수 없습니다."
+                                        }
+                                        """)))
+        })
+        ResponseEntity<?> getEmailVerificationStatus(
+                        @Parameter(description = "인증 상태를 확인할 이메일", example = "test@example.com") @RequestParam("email") String email);
 
-    @Operation(summary = "소상공인 회원가입", description = "이메일 인증이 완료된 사용자의 계정과 가게 정보를 등록합니다.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "회원가입 성공", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                    {
-                      "userId": 1,
-                      "storeId": 1,
-                      "message": "회원가입이 완료되었습니다."
-                    }
-                    """))),
-            @ApiResponse(responseCode = "400", description = "잘못된 요청 / 비밀번호 오류 / 이메일 미인증"),
-            @ApiResponse(responseCode = "404", description = "이메일 인증 정보 없음"),
-            @ApiResponse(responseCode = "409", description = "이미 등록된 이메일")
-    })
-    ResponseEntity<?> signup(
-            @Valid @RequestBody SignUpReqDto dto);
+        @Operation(summary = "소상공인 회원가입", description = "이메일 인증이 완료된 사용자의 계정과 가게 정보를 등록합니다.")
+        @ApiResponses({
+                        @ApiResponse(responseCode = "200", description = "회원가입 성공", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                                        {
+                                          "userId": 1,
+                                          "storeId": 1,
+                                          "message": "회원가입이 완료되었습니다."
+                                        }
+                                        """))),
+                        @ApiResponse(responseCode = "400", description = "잘못된 요청 / 비밀번호 오류 / 이메일 미인증"),
+                        @ApiResponse(responseCode = "404", description = "이메일 인증 정보 없음"),
+                        @ApiResponse(responseCode = "409", description = "이미 등록된 이메일")
+        })
+        ResponseEntity<?> signup(
+                        @Valid @RequestBody SignUpReqDto dto);
 
-    @Operation(summary = "소상공인 로그인", description = "가입된 소상공인 계정의 이메일과 비밀번호를 검증한 뒤 JWT 토큰을 발급합니다.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "로그인 성공", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                    {
-                      "userId": 1,
-                      "email": "owner@example.com",
-                      "accessToken": "eyJhbGciOiJIUzI1NiJ9...",
-                      "refreshToken": "eyJhbGciOiJIUzI1NiJ9...",
-                      "message": "로그인에 성공했습니다."
-                    }
-                    """))),
-            @ApiResponse(responseCode = "401", description = "로그인 실패", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                    {
-                      "status": 401,
-                      "message": "이메일 또는 비밀번호가 일치하지 않습니다."
-                    }
-                    """)))
-    })
-    ResponseEntity<?> login(
-            @Valid @RequestBody LoginReqDto dto);
+        @Operation(summary = "소상공인 로그인", description = "가입된 소상공인 계정의 이메일과 비밀번호를 검증한 뒤 JWT 토큰을 발급합니다.")
+        @ApiResponses({
+                        @ApiResponse(responseCode = "200", description = "로그인 성공", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                                        {
+                                          "userId": 1,
+                                          "email": "owner@example.com",
+                                          "accessToken": "eyJhbGciOiJIUzI1NiJ9...",
+                                          "refreshToken": "eyJhbGciOiJIUzI1NiJ9...",
+                                          "message": "로그인에 성공했습니다."
+                                        }
+                                        """))),
+                        @ApiResponse(responseCode = "401", description = "로그인 실패", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                                        {
+                                          "status": 401,
+                                          "message": "이메일 또는 비밀번호가 일치하지 않습니다."
+                                        }
+                                        """)))
+        })
+        ResponseEntity<?> login(
+                        @Valid @RequestBody LoginReqDto dto);
+
+        @Operation(summary = "로그아웃", description = """
+                        로그인한 사용자가 로그아웃을 요청합니다.
+                        JWT 기반 인증 구조이므로 서버는 로그아웃 성공 응답을 반환하고,
+                        프론트엔드는 저장된 accessToken과 refreshToken을 삭제해야 합니다.
+                        Swagger 상단의 Authorize 버튼에 Bearer 토큰을 입력한 후 요청해야 합니다.
+                        """)
+        @ApiResponses({
+                        @ApiResponse(responseCode = "200", description = "로그아웃 성공", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                                        {
+                                          "message": "로그아웃되었습니다."
+                                        }
+                                        """))),
+                        @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                                        {
+                                          "status": 401,
+                                          "message": "인증에 실패하였습니다."
+                                        }
+                                        """)))
+        })
+        ResponseEntity<?> logout();
 }

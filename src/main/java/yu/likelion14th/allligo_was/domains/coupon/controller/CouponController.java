@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import yu.likelion14th.allligo_was.domains.coupon.api.CouponAPI;
 import yu.likelion14th.allligo_was.domains.coupon.dto.request.CouponCreateReqDto;
 import yu.likelion14th.allligo_was.domains.coupon.service.CouponService;
+import yu.likelion14th.allligo_was.domains.coupon.dto.request.CouponUpdateReqDto;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,15 +20,38 @@ public class CouponController implements CouponAPI {
     @Override
     @PostMapping
     public ResponseEntity<?> createCoupon(
-            @Valid @RequestBody CouponCreateReqDto dto
-    ) {
+            @Valid @RequestBody CouponCreateReqDto dto) {
         Long userId = getCurrentUserId();
         return ResponseEntity.ok(couponService.createCoupon(userId, dto));
+    }
+
+    @Override
+    @GetMapping("/me")
+    public ResponseEntity<?> getMyCoupons() {
+        Long userId = getCurrentUserId();
+        return ResponseEntity.ok(couponService.getMyCoupons(userId));
     }
 
     private Long getCurrentUserId() {
         return (Long) SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getPrincipal();
+    }
+
+    @Override
+    @PatchMapping("/{couponId}")
+    public ResponseEntity<?> updateCoupon(
+            @PathVariable("couponId") Long couponId,
+            @Valid @RequestBody CouponUpdateReqDto dto) {
+        Long userId = getCurrentUserId();
+        return ResponseEntity.ok(couponService.updateCoupon(userId, couponId, dto));
+    }
+
+    @Override
+    @DeleteMapping("/{couponId}")
+    public ResponseEntity<?> deleteCoupon(
+            @PathVariable("couponId") Long couponId) {
+        Long userId = getCurrentUserId();
+        return ResponseEntity.ok(couponService.deleteCoupon(userId, couponId));
     }
 }

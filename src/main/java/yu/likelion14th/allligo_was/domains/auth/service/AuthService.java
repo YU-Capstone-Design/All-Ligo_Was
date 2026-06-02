@@ -27,7 +27,7 @@ import yu.likelion14th.allligo_was.domains.user.repository.UserRepository;
 import yu.likelion14th.allligo_was.exception.CustomException;
 import yu.likelion14th.allligo_was.exception.ErrorCode;
 import yu.likelion14th.allligo_was.security.JwtUtil;
-
+import yu.likelion14th.allligo_was.domains.auth.dto.response.LogoutResDto;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -203,6 +203,12 @@ public class AuthService {
                 .build();
     }
 
+    public LogoutResDto logout() {
+        return LogoutResDto.builder()
+                .message("로그아웃되었습니다.")
+                .build();
+    }
+
     private String createToken() {
         return UUID.randomUUID().toString();
     }
@@ -231,7 +237,8 @@ public class AuthService {
                         </a>
                     </body>
                     </html>
-                    """.formatted(verifyLink);
+                    """
+                    .formatted(verifyLink);
 
             helper.setText(html, true);
             mailSender.send(message);
