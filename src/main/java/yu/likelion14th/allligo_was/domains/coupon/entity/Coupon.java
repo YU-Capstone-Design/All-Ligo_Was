@@ -36,4 +36,11 @@ public class Coupon {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_id", nullable = false)
     private Store store;
+
+    public void updateCoupon(String imageUrl, String menuName, Integer discountNum, DiscountType discountType) {
+        this.imageUrl = imageUrl;
+        this.menuName = menuName;
+        this.discountNum = discountNum;
+        this.discountType = discountType;
+    }
 }

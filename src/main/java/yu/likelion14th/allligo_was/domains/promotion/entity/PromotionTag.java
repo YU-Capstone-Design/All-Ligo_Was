@@ -35,6 +35,4 @@ public class PromotionTag {
     private Promotion promotion;
 
 
-
-
 }

@@ -8,13 +8,16 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import yu.likelion14th.allligo_was.domains.content.entity.TagLog;
 import yu.likelion14th.allligo_was.domains.user.entity.User;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -57,6 +60,10 @@ public class Promotion {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    // 태그를 불러오기 위한 양방향 관계
+    @OneToMany(mappedBy = "promotion", fetch = FetchType.LAZY)
+    List<PromotionTag> tags;
+
     public void updatePromotionInfo(
             String promotionTitle,
             String contentType,
@@ -73,5 +80,8 @@ public class Promotion {
         this.deadline = deadline;
         this.updatedAt = LocalDateTime.now();
     }
+
+
+
 
 }

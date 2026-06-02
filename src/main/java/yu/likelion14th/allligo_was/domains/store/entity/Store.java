@@ -36,7 +36,7 @@ public class Store {
     @Column(name="longitude", nullable = false)
     private Double longitude;
 
-    @Column(name="map_url", nullable = false)
+    @Column(length=2048, name="map_url", nullable = false)
     private String mapUrl;
 
     @Column(name = "profile_image_url", length = 500)
