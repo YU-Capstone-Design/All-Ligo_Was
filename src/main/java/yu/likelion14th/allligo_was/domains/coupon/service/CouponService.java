@@ -13,7 +13,9 @@ import yu.likelion14th.allligo_was.domains.user.entity.User;
 import yu.likelion14th.allligo_was.domains.user.repository.UserRepository;
 import yu.likelion14th.allligo_was.exception.CustomException;
 import yu.likelion14th.allligo_was.exception.ErrorCode;
+import yu.likelion14th.allligo_was.domains.coupon.dto.response.CouponListResDto;
 
+import java.util.List;
 import java.time.LocalDateTime;
 
 @Service
@@ -62,4 +64,17 @@ public class CouponService {
             throw new CustomException(ErrorCode.INVALID_COUPON_IMAGE_URL);
         }
     }
+
+    public List<CouponListResDto> getMyCoupons(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Store store = storeRepository.findByUser(user)
+                .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
+
+        return couponRepository.findAllByStore(store)
+                .stream()
+                .map(CouponListResDto::fromEntity)
+                .toList();
+        }
 }

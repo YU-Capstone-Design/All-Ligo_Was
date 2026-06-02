@@ -25,6 +25,13 @@ public class CouponController implements CouponAPI {
         return ResponseEntity.ok(couponService.createCoupon(userId, dto));
     }
 
+    @Override
+    @GetMapping("/me")
+    public ResponseEntity<?> getMyCoupons() {
+        Long userId = getCurrentUserId();
+        return ResponseEntity.ok(couponService.getMyCoupons(userId));
+    }
+
     private Long getCurrentUserId() {
         return (Long) SecurityContextHolder.getContext()
                 .getAuthentication()
