@@ -48,6 +48,11 @@ public enum ErrorCode {
 
     // 컨텐츠 관련
     CONTENT_NOT_FOUND(HttpStatus.NOT_FOUND, "콘텐츠를 찾을 수 없습니다."),
+    CONTENT_ACCESS_DENIED(HttpStatus.FORBIDDEN, "해당 콘텐츠에 접근할 권한이 없습니다."),
+    CONTENT_PREVIEW_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "생성 완료된 콘텐츠만 미리보기할 수 있습니다."),
+    CONTENT_CANCEL_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "생성 완료된 콘텐츠만 배포 중단할 수 있습니다."),
+    CONTENT_ALREADY_CANCELLED(HttpStatus.BAD_REQUEST, "이미 배포 중단된 콘텐츠입니다."),
+    CONTENT_ALREADY_PUBLISHED(HttpStatus.BAD_REQUEST, "이미 업로드된 콘텐츠는 배포 중단할 수 없습니다."),
 
     COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, "쿠폰을 찾을 수 없습니다."),
     FORBIDDEN_COUPON_ACCESS(HttpStatus.FORBIDDEN, "해당 쿠폰에 접근할 수 없습니다."),
