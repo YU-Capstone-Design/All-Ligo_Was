@@ -25,6 +25,8 @@ import yu.likelion14th.allligo_was.exception.ErrorCode;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -398,11 +400,18 @@ public class PromotionService {
             return;
         }
 
-        boolean hasInvalidTag = tags.stream()
-                .anyMatch(tag -> tag == null || tag.isBlank() || tag.length() > 7);
+        Set<String> tagSet = new HashSet<>();
 
-        if (hasInvalidTag) {
-            throw new CustomException(ErrorCode.INVALID_PROMOTION_TAG_LENGTH);
+        for (String tag : tags) {
+            if (tag == null || tag.isBlank() || tag.length() > 7) {
+                throw new CustomException(ErrorCode.INVALID_PROMOTION_TAG_LENGTH);
+            }
+
+            String normalizedTag = tag.trim();
+
+            if (!tagSet.add(normalizedTag)) {
+                throw new CustomException(ErrorCode.DUPLICATE_PROMOTION_TAG);
+            }
         }
     }
 
@@ -413,6 +422,7 @@ public class PromotionService {
      */
     private void validateSchedules(List<PromotionScheduleReqDto> schedules) {
         LocalDateTime minimumPublishTime = LocalDateTime.now().plusHours(1);
+        Set<String> scheduleKeys = new HashSet<>();
 
         for (PromotionScheduleReqDto schedule : schedules) {
             if (schedule.getDayOfWeek() == null
@@ -428,6 +438,17 @@ public class PromotionService {
             if (schedule.getPublishTime().isBefore(minimumPublishTime)) {
                 throw new CustomException(ErrorCode.INVALID_PROMOTION_PUBLISH_TIME);
             }
+
+            String scheduleKey = schedule.getDayOfWeek() + "_"
+                    + schedule.getPublishTime()
+                    .toLocalTime()
+                    .withSecond(0)
+                    .withNano(0);
+
+            if (!scheduleKeys.add(scheduleKey)) {
+                throw new CustomException(ErrorCode.DUPLICATE_PROMOTION_SCHEDULE);
+            }
         }
+
     }
 }
