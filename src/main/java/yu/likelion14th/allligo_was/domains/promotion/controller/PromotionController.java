@@ -11,6 +11,8 @@ import yu.likelion14th.allligo_was.domains.promotion.dto.request.PromotionCreate
 import yu.likelion14th.allligo_was.domains.promotion.dto.request.PromotionUpdateReqDto;
 import yu.likelion14th.allligo_was.domains.promotion.dto.response.PromotionDetailResDto;
 import yu.likelion14th.allligo_was.domains.promotion.dto.response.PromotionListResDto;
+import yu.likelion14th.allligo_was.domains.promotion.dto.response.PromotionScheduleQueueResDto;
+import yu.likelion14th.allligo_was.domains.promotion.service.PromotionQueueService;
 import yu.likelion14th.allligo_was.domains.promotion.service.PromotionService;
 
 import java.util.List;
@@ -21,7 +23,9 @@ import java.util.List;
 public class PromotionController implements PromotionAPI {
 
     private final PromotionService promotionService;
+    private final PromotionQueueService promotionQueueService;
 
+    @Override
     @PostMapping
     public ResponseEntity<PromotionDetailResDto> createPromotion(
             @Valid @RequestBody PromotionCreateReqDto request
@@ -34,6 +38,7 @@ public class PromotionController implements PromotionAPI {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @Override
     @GetMapping("/me")
     public ResponseEntity<List<PromotionListResDto>> getMyPromotions() {
         Long userId = getCurrentUserId();
@@ -44,6 +49,7 @@ public class PromotionController implements PromotionAPI {
         return ResponseEntity.ok(response);
     }
 
+    @Override
     @GetMapping("/{promotionId}")
     public ResponseEntity<PromotionDetailResDto> getPromotionDetail(
             @PathVariable Long promotionId
@@ -56,6 +62,7 @@ public class PromotionController implements PromotionAPI {
         return ResponseEntity.ok(response);
     }
 
+    @Override
     @PutMapping("/{promotionId}")
     public ResponseEntity<PromotionDetailResDto> updatePromotion(
             @PathVariable Long promotionId,
@@ -69,6 +76,7 @@ public class PromotionController implements PromotionAPI {
         return ResponseEntity.ok(response);
     }
 
+    @Override
     @DeleteMapping("/{promotionId}")
     public ResponseEntity<Void> deletePromotion(
             @PathVariable Long promotionId
@@ -78,6 +86,17 @@ public class PromotionController implements PromotionAPI {
         promotionService.deletePromotion(userId, promotionId);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    @GetMapping("/schedules/queue")
+    public ResponseEntity<List<PromotionScheduleQueueResDto>> getScheduleQueue() {
+        Long userId = getCurrentUserId();
+
+        List<PromotionScheduleQueueResDto> response =
+                promotionQueueService.getScheduleQueue(userId);
+
+        return ResponseEntity.ok(response);
     }
 
     private Long getCurrentUserId() {
