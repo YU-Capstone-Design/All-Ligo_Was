@@ -44,6 +44,8 @@ public enum ErrorCode {
     INVALID_PROMOTION_PUBLISH_TIME(HttpStatus.BAD_REQUEST, "배포 시간은 현재 시간보다 1시간 이후여야 합니다."),
     INVALID_PROMOTION_DAY_OF_WEEK(HttpStatus.BAD_REQUEST, "배포 요일 값이 올바르지 않습니다."),
     INVALID_PROMOTION_MODE(HttpStatus.BAD_REQUEST, "분위기 태그는 따뜻함, 차분함, 밝음 중 하나만 선택할 수 있습니다."),
+    DUPLICATE_PROMOTION_SCHEDULE(HttpStatus.BAD_REQUEST, "같은 홍보 요청 안에서 동일한 요일과 시간의 스케줄은 중복 등록할 수 없습니다."),
+    DUPLICATE_PROMOTION_TAG(HttpStatus.BAD_REQUEST, "같은 홍보 요청 안에서 동일한 해시태그는 중복 등록할 수 없습니다."),
     
 
     // 컨텐츠 관련
