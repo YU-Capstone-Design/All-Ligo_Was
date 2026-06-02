@@ -11,4 +11,8 @@ import java.util.List;
 public interface PromotionScheduleRepository extends JpaRepository<PromotionSchedule,Long> {
     // List<PromotionSchedule> findValidSchedules(String currentDayOfWeek, LocalTime oneHourLater, LocalDate today);
     List<PromotionSchedule> findAllByPublishTimeBetween(LocalDateTime start, LocalDateTime end);
+
+    List<PromotionSchedule> findAllByPromotionPromotionId(Long promotionId);
+
+    void deleteAllByPromotionPromotionId(Long promotionId);
 }

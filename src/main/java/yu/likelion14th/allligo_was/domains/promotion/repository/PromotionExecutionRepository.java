@@ -1,6 +1,7 @@
 package yu.likelion14th.allligo_was.domains.promotion.repository;
 
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import yu.likelion14th.allligo_was.domains.promotion.entity.PromotionExecution;
@@ -9,4 +10,7 @@ import yu.likelion14th.allligo_was.domains.promotion.entity.PromotionSchedule;
 public interface PromotionExecutionRepository extends JpaRepository<PromotionExecution, Long> {
     Optional<PromotionExecution> findFirstByPromotionScheduleOrderByExecutedAtDesc(PromotionSchedule schedule);
     Optional<PromotionExecution> findByTaskId(String taskId);
+
+    List<PromotionExecution> findAllByPromotionPromotionId(Long promotionId);
+    void deleteAllByPromotionPromotionId(Long promotionId);
 }
