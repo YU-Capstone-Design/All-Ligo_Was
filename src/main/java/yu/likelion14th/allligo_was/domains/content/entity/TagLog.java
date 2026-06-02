@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import yu.likelion14th.allligo_was.domains.promotion.entity.PromotionTag;
 
 import java.time.LocalDateTime;
 
@@ -20,20 +21,16 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ClickLog {
+public class TagLog {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long clickId;
+    private Long id;
 
     @Column(name="clicked_at", nullable = false)
     private LocalDateTime clickedAt;
 
-    @Column(name="click_source", nullable = false)
-    private String clickSource;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="content_id", nullable = false)
-    private Content content;
-
+    @JoinColumn(name="promotion_tag", nullable = false)
+    private PromotionTag promotionTag;
 }
