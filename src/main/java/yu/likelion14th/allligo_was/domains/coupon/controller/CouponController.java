@@ -46,4 +46,12 @@ public class CouponController implements CouponAPI {
         Long userId = getCurrentUserId();
         return ResponseEntity.ok(couponService.updateCoupon(userId, couponId, dto));
     }
+
+    @Override
+    @DeleteMapping("/{couponId}")
+    public ResponseEntity<?> deleteCoupon(
+            @PathVariable("couponId") Long couponId) {
+        Long userId = getCurrentUserId();
+        return ResponseEntity.ok(couponService.deleteCoupon(userId, couponId));
+    }
 }

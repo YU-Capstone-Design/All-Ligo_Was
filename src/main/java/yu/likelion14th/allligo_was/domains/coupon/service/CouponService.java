@@ -108,6 +108,31 @@ public class CouponService {
                                 .build();
         }
 
+        @Transactional
+        public CouponResDto deleteCoupon(Long userId, Long couponId) {
+                User user = userRepository.findById(userId)
+                                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+                Store store = storeRepository.findByUser(user)
+                                .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
+
+                Coupon coupon = couponRepository.findById(couponId)
+                                .orElseThrow(() -> new CustomException(ErrorCode.COUPON_NOT_FOUND));
+
+                validateCouponOwner(coupon, store);
+
+                couponRepository.delete(coupon);
+
+                return CouponResDto.builder()
+                                .couponId(coupon.getCouponId())
+                                .imageUrl(coupon.getImageUrl())
+                                .menuName(coupon.getMenuName())
+                                .discountNum(coupon.getDiscountNum())
+                                .discountType(coupon.getDiscountType())
+                                .message("쿠폰이 삭제되었습니다.")
+                                .build();
+        }
+
         private void validateCouponOwner(Coupon coupon, Store store) {
                 if (!coupon.getStore().getStoreId().equals(store.getStoreId())) {
                         throw new CustomException(ErrorCode.FORBIDDEN_COUPON_ACCESS);
