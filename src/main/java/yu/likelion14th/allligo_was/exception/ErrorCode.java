@@ -59,6 +59,11 @@ public enum ErrorCode {
     COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, "쿠폰을 찾을 수 없습니다."),
     FORBIDDEN_COUPON_ACCESS(HttpStatus.FORBIDDEN, "해당 쿠폰에 접근할 수 없습니다."),
 
+    //S3 error code
+    INVALID_IMAGE_CONTENT_TYPE(HttpStatus.BAD_REQUEST, "png, jpg, jpeg 이미지만 업로드할 수 있습니다."),
+    INVALID_FILE_URL(HttpStatus.BAD_REQUEST, "허용되지 않은 파일 URL입니다."),
+    FILE_URL_REQUIRED(HttpStatus.BAD_REQUEST, "파일 URL은 필수입니다."),
+    INVALID_UPLOAD_DOMAIN(HttpStatus.BAD_REQUEST, "지원하지 않는 업로드 도메인입니다."),
 
     INVALID_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다.");

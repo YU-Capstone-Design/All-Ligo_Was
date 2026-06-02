@@ -3,6 +3,8 @@ package yu.likelion14th.allligo_was.domains.promotion.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import yu.likelion14th.allligo_was.S3.dto.UploadDomain;
+import yu.likelion14th.allligo_was.S3.service.S3Service;
 import yu.likelion14th.allligo_was.domains.content.repository.ContentRepository;
 import yu.likelion14th.allligo_was.domains.promotion.dto.request.PromotionCreateReqDto;
 import yu.likelion14th.allligo_was.domains.promotion.dto.request.PromotionScheduleReqDto;
@@ -22,6 +24,7 @@ import yu.likelion14th.allligo_was.domains.user.entity.User;
 import yu.likelion14th.allligo_was.domains.user.repository.UserRepository;
 import yu.likelion14th.allligo_was.exception.CustomException;
 import yu.likelion14th.allligo_was.exception.ErrorCode;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -46,6 +49,7 @@ public class PromotionService {
     private final PromotionExecutionRepository promotionExecutionRepository;
     private final ContentRepository contentRepository;
     private final UserRepository userRepository;
+    private final S3Service s3Service;
 
     /**
      * 홍보 콘텐츠 생성 요청 및 스케줄을 등록합니다.
@@ -56,6 +60,7 @@ public class PromotionService {
      */
     public PromotionDetailResDto createPromotion(Long userId, PromotionCreateReqDto request) {
         validateCreateRequest(request);
+        s3Service.validateFileUrls(userId, UploadDomain.PROMOTION, request.getImageUrls());
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
@@ -156,6 +161,7 @@ public class PromotionService {
         Promotion promotion = getPromotionByUser(userId, promotionId);
 
         validateUpdateRequest(request);
+        s3Service.validateFileUrls(userId, UploadDomain.PROMOTION, request.getImageUrls());
 
         promotion.updatePromotionInfo(
                 request.getPromotionTitle(),
