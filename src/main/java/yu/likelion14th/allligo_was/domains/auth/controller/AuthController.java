@@ -64,4 +64,10 @@ public class AuthController implements AuthAPI {
     public ResponseEntity<?> login(@Valid @RequestBody LoginReqDto dto) {
         return ResponseEntity.ok(authService.login(dto));
     }
+
+    @Override
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout() {
+        return ResponseEntity.ok(authService.logout());
+    }
 }

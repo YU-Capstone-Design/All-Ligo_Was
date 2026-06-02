@@ -30,10 +30,12 @@ public enum ErrorCode {
 
     INVALID_COUPON_IMAGE_URL(HttpStatus.BAD_REQUEST, "쿠폰 이미지 URL이 유효하지 않습니다."),
 
+
     // 컨텐츠 관련
     CONTENT_NOT_FOUND(HttpStatus.NOT_FOUND, "콘텐츠를 찾을 수 없습니다."),
 
-
+    COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, "쿠폰을 찾을 수 없습니다."),
+    FORBIDDEN_COUPON_ACCESS(HttpStatus.FORBIDDEN, "해당 쿠폰에 접근할 수 없습니다."),
 
 
     INVALID_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
