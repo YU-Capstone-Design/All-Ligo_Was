@@ -32,6 +32,9 @@ public class Promotion {
     @Column(name= "content_type", nullable = false)
     private String contentType;
 
+    @Column(name = "promotion_title", nullable = false)
+    private String promotionTitle;
+
     @Column(name="prompt", nullable = false)
     private String prompt;
 
@@ -54,6 +57,21 @@ public class Promotion {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-
+    public void updatePromotionInfo(
+            String promotionTitle,
+            String contentType,
+            String prompt,
+            boolean isWeatherEnabled,
+            String mode,
+            LocalDateTime deadline
+    ) {
+        this.promotionTitle = promotionTitle;
+        this.contentType = contentType;
+        this.prompt = prompt;
+        this.isWeatherEnabled = isWeatherEnabled;
+        this.mode = mode;
+        this.deadline = deadline;
+        this.updatedAt = LocalDateTime.now();
+    }
 
 }
