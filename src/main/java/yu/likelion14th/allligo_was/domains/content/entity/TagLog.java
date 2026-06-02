@@ -1,4 +1,4 @@
-package yu.likelion14th.allligo_was.domains.promotion.entity;
+package yu.likelion14th.allligo_was.domains.content.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,27 +12,25 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import yu.likelion14th.allligo_was.domains.promotion.entity.PromotionTag;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PromotionTag {
+public class TagLog {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long tagId;
+    private Long id;
 
-    @Column(name="tag_name", nullable = false)
-    private String tagName;
-
-    @Column(name="tag_type", nullable = false)
-    private String tagType;
+    @Column(name="clicked_at", nullable = false)
+    private LocalDateTime clickedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "promotion_id", nullable = false)
-    private Promotion promotion;
-
-
+    @JoinColumn(name="promotion_tag", nullable = false)
+    private PromotionTag promotionTag;
 }
