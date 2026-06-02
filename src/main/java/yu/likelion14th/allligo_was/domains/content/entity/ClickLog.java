@@ -29,9 +29,6 @@ public class ClickLog {
     @Column(name="clicked_at", nullable = false)
     private LocalDateTime clickedAt;
 
-    @Column(name="ip_address")
-    private String ipAddress;
-
     @Column(name="click_source", nullable = false)
     private String clickSource;
 
