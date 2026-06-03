@@ -49,8 +49,9 @@ public class SecurityConfig {
                                 "/error",
                                 "/test/*",
                                 "/api/v1/contents/track/**",
-                                "/api/v1/coupons/region",
-                                "/api/v1/coupons/nearby"
+                                "/api/v1/coupons/region/stores",
+                                "/api/v1/coupons/nearby/stores",
+                                "/api/v1/coupons/stores/*"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

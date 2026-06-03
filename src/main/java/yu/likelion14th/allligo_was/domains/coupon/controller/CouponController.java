@@ -9,6 +9,7 @@ import yu.likelion14th.allligo_was.domains.coupon.api.CouponAPI;
 import yu.likelion14th.allligo_was.domains.coupon.dto.request.CouponCreateReqDto;
 import yu.likelion14th.allligo_was.domains.coupon.service.CouponService;
 import yu.likelion14th.allligo_was.domains.coupon.dto.request.CouponUpdateReqDto;
+import yu.likelion14th.allligo_was.domains.store.service.StoreService;
 
 @RestController
 @RequiredArgsConstructor
@@ -16,6 +17,7 @@ import yu.likelion14th.allligo_was.domains.coupon.dto.request.CouponUpdateReqDto
 public class CouponController implements CouponAPI {
 
     private final CouponService couponService;
+    private final StoreService storeService;
 
     @Override
     @PostMapping
@@ -56,17 +58,24 @@ public class CouponController implements CouponAPI {
     }
 
     @Override
-    @GetMapping("/region")
-    public ResponseEntity<?> getCouponsByRegion(
+    @GetMapping("/region/stores")
+    public ResponseEntity<?> getStoresByRegion(
             @RequestParam("region") String region) {
-        return ResponseEntity.ok(couponService.getCouponsByRegion(region));
+        return ResponseEntity.ok(storeService.getStoresWithCouponsByRegion(region));
     }
 
     @Override
-    @GetMapping("/nearby")
-    public ResponseEntity<?> getNearbyCoupons(
+    @GetMapping("/nearby/stores")
+    public ResponseEntity<?> getNearbyStores(
             @RequestParam("latitude") Double latitude,
             @RequestParam("longitude") Double longitude) {
-        return ResponseEntity.ok(couponService.getNearbyCoupons(latitude, longitude));
+        return ResponseEntity.ok(storeService.getNearbyStoresWithCoupons(latitude, longitude));
+    }
+
+    @Override
+    @GetMapping("/stores/{storeId}")
+    public ResponseEntity<?> getCouponsByStoreId(
+            @PathVariable("storeId") Long storeId) {
+        return ResponseEntity.ok(couponService.getCouponsByStoreId(storeId));
     }
 }

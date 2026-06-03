@@ -188,12 +188,12 @@ public interface CouponAPI {
   ResponseEntity<?> deleteCoupon(
       @PathVariable("couponId") Long couponId);
 
-  @Operation(summary = "지역 기반 쿠폰 조회", description = """
-      지정된 행정구역에 위치한 매장 정보와 해당 매장들이 보유한 쿠폰 리스트를 조회합니다.
+  @Operation(summary = "지역 기반 할인쿠폰 보유 매장 조회", description = """
+      지정된 행정구역에 위치하며, 할인쿠폰을 보유한 매장 리스트를 조회합니다.
       비로그인 상태에서 접근이 가능한 전용 API입니다.
       """)
   @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "지역별 쿠폰 조회 성공", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+      @ApiResponse(responseCode = "200", description = "지역별 매장 조회 성공", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
           [
             {
               "storeId": 1,
@@ -202,16 +202,7 @@ public interface CouponAPI {
               "latitude": 35.8711,
               "longitude": 128.6014,
               "mapUrl": "https://map.naver.com/...",
-              "profileImageUrl": "https://...",
-              "coupons": [
-                {
-                  "couponId": 1,
-                  "imageUrl": "https://...",
-                  "menuName": "아메리카노",
-                  "discountNum": 1000,
-                  "discountType": "AMOUNT"
-                }
-              ]
+              "profileImageUrl": "https://..."
             }
           ]
           """))),
@@ -222,14 +213,14 @@ public interface CouponAPI {
           }
           """)))
   })
-  ResponseEntity<?> getCouponsByRegion(String region);
+  ResponseEntity<?> getStoresByRegion(String region);
 
-  @Operation(summary = "현위치 기반 반경 3km 쿠폰 조회", description = """
-      사용자의 현재 위경도 좌표를 기준으로 3km 이내에 위치한 매장과 해당 매장들이 보유한 쿠폰 리스트를 가까운 순서대로 조회합니다.
+  @Operation(summary = "현위치 기반 반경 3km 할인쿠폰 보유 매장 조회", description = """
+      사용자의 현재 위경도 좌표를 기준으로 3km 이내에 위치하며, 할인쿠폰을 보유한 매장 리스트를 가까운 순서대로 조회합니다.
       비로그인 상태에서 접근이 가능한 전용 API입니다.
       """)
   @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "반경 내 쿠폰 조회 성공", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+      @ApiResponse(responseCode = "200", description = "반경 내 매장 조회 성공", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
           [
             {
               "storeId": 1,
@@ -238,19 +229,35 @@ public interface CouponAPI {
               "latitude": 35.8711,
               "longitude": 128.6014,
               "mapUrl": "https://map.naver.com/...",
-              "profileImageUrl": "https://...",
-              "coupons": [
-                {
-                  "couponId": 1,
-                  "imageUrl": "https://...",
-                  "menuName": "아메리카노",
-                  "discountNum": 1000,
-                  "discountType": "AMOUNT"
-                }
-              ]
+              "profileImageUrl": "https://..."
             }
           ]
           """)))
   })
-  ResponseEntity<?> getNearbyCoupons(Double latitude, Double longitude);
+  ResponseEntity<?> getNearbyStores(Double latitude, Double longitude);
+
+  @Operation(summary = "특정 매장의 쿠폰 목록 조회", description = """
+      지정한 매장(storeId)이 보유하고 있는 모든 쿠폰 리스트를 조회합니다.
+      비로그인 상태에서 접근이 가능한 전용 API입니다.
+      """)
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "매장 쿠폰 목록 조회 성공", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+          [
+            {
+              "couponId": 1,
+              "imageUrl": "https://...",
+              "menuName": "아메리카노",
+              "discountNum": 1000,
+              "discountType": "AMOUNT"
+            }
+          ]
+          """))),
+      @ApiResponse(responseCode = "404", description = "매장을 찾을 수 없음", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+          {
+            "status": 404,
+            "message": "매장 정보를 찾을 수 없습니다."
+          }
+          """)))
+  })
+  ResponseEntity<?> getCouponsByStoreId(Long storeId);
 }

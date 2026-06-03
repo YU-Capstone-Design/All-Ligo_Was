@@ -142,42 +142,13 @@ public class CouponService {
                 }
         }
 
-        public List<StoreCouponResponseDto> getCouponsByRegion(String region) {
-                List<Store> stores = storeService.getStoresByRegion(region);
-                return stores.stream()
-                                .map(store -> {
-                                        List<CouponInfoResponseDto> couponDtos = store.getCoupons().stream()
-                                                        .map(CouponInfoResponseDto::fromEntity)
-                                                        .toList();
-                                        return StoreCouponResponseDto.of(store, couponDtos);
-                                })
-                                .toList();
-        }
+        public List<CouponInfoResponseDto> getCouponsByStoreId(Long storeId) {
+                Store store = storeRepository.findById(storeId)
+                                .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
 
-        public List<StoreCouponResponseDto> getNearbyCoupons(Double latitude, Double longitude) {
-                List<Store> stores = storeService.getNearbyStores(latitude, longitude);
-                if (stores.isEmpty()) {
-                        return Collections.emptyList();
-                }
-
-                List<Coupon> coupons = couponRepository.findAllByStoreIn(stores);
-                Map<Long, List<CouponInfoResponseDto>> storeCouponMap = coupons.stream()
-                                .collect(Collectors.groupingBy(
-                                                coupon -> coupon.getStore().getStoreId(),
-                                                Collectors.mapping(
-                                                                CouponInfoResponseDto::fromEntity,
-                                                                Collectors.toList()
-                                                )
-                                ));
-
-                return stores.stream()
-                                .map(store -> {
-                                        List<CouponInfoResponseDto> couponDtos = storeCouponMap.getOrDefault(
-                                                        store.getStoreId(),
-                                                        Collections.emptyList()
-                                        );
-                                        return StoreCouponResponseDto.of(store, couponDtos);
-                                })
+                return couponRepository.findAllByStore(store)
+                                .stream()
+                                .map(CouponInfoResponseDto::fromEntity)
                                 .toList();
         }
 }

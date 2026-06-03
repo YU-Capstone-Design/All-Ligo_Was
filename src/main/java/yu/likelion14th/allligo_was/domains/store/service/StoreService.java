@@ -3,6 +3,7 @@ package yu.likelion14th.allligo_was.domains.store.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import yu.likelion14th.allligo_was.domains.store.dto.response.StoreResponseDto;
 import yu.likelion14th.allligo_was.domains.store.entity.Store;
 import yu.likelion14th.allligo_was.domains.store.repository.StoreRepository;
 
@@ -23,13 +24,19 @@ public class StoreService {
             "대구", "경북", "부산", "울산", "경남", "광주", "전남", "전북", "제주"
     ));
 
-    public List<Store> getStoresByRegion(String region) {
+    public List<StoreResponseDto> getStoresWithCouponsByRegion(String region) {
         validateRegion(region);
-        return storeRepository.findAllByRegionWithCoupons(region);
+        return storeRepository.findAllByRegionHavingCoupons(region)
+                .stream()
+                .map(StoreResponseDto::fromEntity)
+                .toList();
     }
 
-    public List<Store> getNearbyStores(Double latitude, Double longitude) {
-        return storeRepository.findNearbyStores(latitude, longitude);
+    public List<StoreResponseDto> getNearbyStoresWithCoupons(Double latitude, Double longitude) {
+        return storeRepository.findNearbyStoresHavingCoupons(latitude, longitude)
+                .stream()
+                .map(StoreResponseDto::fromEntity)
+                .toList();
     }
 
     private void validateRegion(String region) {
