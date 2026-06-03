@@ -5,9 +5,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import yu.likelion14th.allligo_was.domains.content.entity.Content;
+import yu.likelion14th.allligo_was.domains.content.repository.ContentRepository;
 import yu.likelion14th.allligo_was.domains.promotion.entity.Promotion;
+import yu.likelion14th.allligo_was.domains.promotion.entity.PromotionExecution;
+import yu.likelion14th.allligo_was.domains.promotion.entity.PromotionImage;
 import yu.likelion14th.allligo_was.domains.promotion.entity.PromotionSchedule;
-import yu.likelion14th.allligo_was.domains.promotion.repository.PromotionScheduleRepository;
+import yu.likelion14th.allligo_was.domains.promotion.repository.PromotionExecutionRepository;
+import yu.likelion14th.allligo_was.domains.promotion.repository.PromotionImageRepository;
+import yu.likelion14th.allligo_was.fastapi.dto.FastapiContentResponseDto;
 import yu.likelion14th.allligo_was.fastapi.dto.FastapiGenerateReqDto;
 import yu.likelion14th.allligo_was.fastapi.dto.FastapiUploadReqDto;
 
@@ -17,6 +23,8 @@ import yu.likelion14th.allligo_was.domains.promotion.repository.PromotionTagRepo
 import yu.likelion14th.allligo_was.domains.store.repository.StoreRepository;
 import yu.likelion14th.allligo_was.domains.store.entity.Store;
 import yu.likelion14th.allligo_was.domains.promotion.entity.PromotionTag;
+import yu.likelion14th.allligo_was.fastapi.dto.FastapiUploadResponseDto;
+
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
@@ -25,13 +33,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FastapiScheduler {
 
-    private final PromotionScheduleRepository scheduleRepository;
     private final FastapiClientService fastapiClientService;
-    private final yu.likelion14th.allligo_was.domains.promotion.repository.PromotionExecutionRepository executionRepository;
-    private final yu.likelion14th.allligo_was.domains.content.repository.ContentRepository contentRepository;
+    private final PromotionExecutionRepository executionRepository;
+    private final ContentRepository contentRepository;
     private final PromotionTagRepository promotionTagRepository;
     private final StoreRepository storeRepository;
-    private final yu.likelion14th.allligo_was.domains.promotion.repository.PromotionImageRepository promotionImageRepository;
+    private final PromotionImageRepository promotionImageRepository;
 
     // 매분 0초에 실행
     @Scheduled(cron = "0 * * * * *")
@@ -48,21 +55,18 @@ public class FastapiScheduler {
         log.info("Two-Track Scheduler Running... now: {}, oneHourLater: {}", now, oneHourLater);
 
         // Track A (T - 1시간): 영상 생성 요청
-        List<PromotionSchedule> generateSchedules = scheduleRepository.findAllByPublishTimeBetween(
-                oneHourLater, oneHourLater.plusSeconds(59));
+        List<PromotionExecution> pendingExecutions = executionRepository.findAllByStatusAndExecutedAtBetween(
+                "PENDING", oneHourLater, oneHourLater.plusSeconds(59));
 
-        for (PromotionSchedule schedule : generateSchedules) {
-            log.info("Track A: Requesting content generation for schedule ID: {}", schedule.getScheduleId());
-            Promotion promotion = schedule.getPromotion();
-
-            // PromotionExecution 생성 및 저장
-            yu.likelion14th.allligo_was.domains.promotion.entity.PromotionExecution execution = yu.likelion14th.allligo_was.domains.promotion.entity.PromotionExecution.builder()
-                    .executedAt(LocalDateTime.now())
-                    .status("PENDING")
-                    .promotion(promotion)
-                    .promotionSchedule(schedule)
-                    .build();
+        for (PromotionExecution execution : pendingExecutions) {
+            log.info("Track A: Requesting content generation for execution ID: {}", execution.getExecutionId());
+            
+            // 상태를 PROCESSING으로 변경 후 저장
+            execution.setStatus("PROCESSING");
             executionRepository.save(execution);
+
+            Promotion promotion = execution.getPromotion();
+            PromotionSchedule schedule = execution.getPromotionSchedule();
 
             // TODO: Promotion과 PromotionTag에서 실제 분위기태그, 해시태그 추출 (현재는 임시값 또는 기본값 처리)
             FastapiGenerateReqDto reqDto = new FastapiGenerateReqDto();
@@ -71,14 +75,17 @@ public class FastapiScheduler {
             reqDto.setMoodTag("밝은, 쾌활한");
             reqDto.setHashTag("#마케팅 #이벤트");
             reqDto.setPrompt(promotion != null ? promotion.getPrompt() : "");
-            reqDto.setUploadDay(schedule.getDayOfWeek());
-            reqDto.setUploadTime(schedule.getPublishTime() != null ? schedule.getPublishTime().toLocalTime().toString() : "morning");
-            reqDto.setScheduleId(String.valueOf(schedule.getScheduleId())); // String 변환
+            
+            if (schedule != null) {
+                reqDto.setUploadDay(schedule.getDayOfWeek());
+                reqDto.setUploadTime(schedule.getPublishTime() != null ? schedule.getPublishTime().toLocalTime().toString() : "morning");
+                reqDto.setScheduleId(String.valueOf(schedule.getScheduleId())); // String 변환
+            }
 
             if (promotion != null) {
                 // 1. S3 이미지 URL 설정 (null 방어)
-                List<yu.likelion14th.allligo_was.domains.promotion.entity.PromotionImage> promotionImages = promotionImageRepository.findAllByPromotion(promotion);
-                List<String> urls = promotionImages != null ? promotionImages.stream().map(yu.likelion14th.allligo_was.domains.promotion.entity.PromotionImage::getImageUrl).collect(Collectors.toList()) : new ArrayList<>();
+                List<PromotionImage> promotionImages = promotionImageRepository.findAllByPromotion(promotion);
+                List<String> urls = promotionImages != null ? promotionImages.stream().map(PromotionImage::getImageUrl).collect(Collectors.toList()) : new ArrayList<>();
                 reqDto.setImageUrls(urls != null && !urls.isEmpty() ? urls : new ArrayList<>());
 
                 // 2. contentType Null 방어 및 기본값 매핑
@@ -103,7 +110,7 @@ public class FastapiScheduler {
             }
 
             try {
-                yu.likelion14th.allligo_was.fastapi.dto.FastapiContentResponseDto response = fastapiClientService.generateContent(reqDto);
+                FastapiContentResponseDto response = fastapiClientService.generateContent(reqDto);
                 if (response != null && response.getTaskId() != null) {
                     execution.setTaskId(response.getTaskId());
                     // status is likely "PROCESSING" from response, or we keep "PENDING"
@@ -114,7 +121,7 @@ public class FastapiScheduler {
                     log.info("Track A generation requested successfully. Task ID: {}", response.getTaskId());
                 }
             } catch (Exception e) {
-                log.error("Track A generation request failed for schedule ID: {}", schedule.getScheduleId(), e);
+                log.error("Track A generation request failed for execution ID: {}", execution.getExecutionId(), e);
                 execution.setStatus("FAILED");
                 execution.setErrorMessage(e.getMessage());
                 executionRepository.save(execution);
@@ -122,24 +129,16 @@ public class FastapiScheduler {
         }
 
         // Track B (T - 0시간): 유튜브 업로드 요청
-        List<PromotionSchedule> uploadSchedules = scheduleRepository.findAllByPublishTimeBetween(
+        List<PromotionExecution> uploadExecutions = executionRepository.findAllByExecutedAtBetween(
                 now, now.plusSeconds(59));
 
-        for (PromotionSchedule schedule : uploadSchedules) {
-            log.info("Track B: Requesting youtube upload for schedule ID: {}", schedule.getScheduleId());
-            Promotion promotion = schedule.getPromotion();
-
-            // 스케줄에 연결된 최근 Execution 조회
-            yu.likelion14th.allligo_was.domains.promotion.entity.PromotionExecution execution = executionRepository
-                    .findFirstByPromotionScheduleOrderByExecutedAtDesc(schedule).orElse(null);
-
-            if (execution == null) {
-                log.warn("Track B: No PromotionExecution found for schedule ID: {}", schedule.getScheduleId());
-                continue;
-            }
+        for (PromotionExecution execution : uploadExecutions) {
+            log.info("Track B: Requesting youtube upload for execution ID: {}", execution.getExecutionId());
+            Promotion promotion = execution.getPromotion();
+            PromotionSchedule schedule = execution.getPromotionSchedule();
 
             // Execution에 연결된 Content 조회
-            yu.likelion14th.allligo_was.domains.content.entity.Content content = contentRepository
+            Content content = contentRepository
                     .findByPromotionExecution(execution).orElse(null);
 
             if (content == null || content.getLocalVideoPath() == null) {
@@ -171,7 +170,7 @@ public class FastapiScheduler {
             String title = "";
             if (!generatedText.isBlank()) {
                 // 첫 번째 줄이나 문장을 추출
-                String firstSentence = generatedText.split("\n|\\.")[0].trim();
+                String firstSentence = generatedText.split("\n|\\\\.")[0].trim();
                 if (firstSentence.length() > 50) {
                     title = firstSentence.substring(0, 50);
                 } else {
@@ -196,7 +195,7 @@ public class FastapiScheduler {
             }
 
             FastapiUploadReqDto uploadReq = FastapiUploadReqDto.builder()
-                    .scheduleId(String.valueOf(schedule.getScheduleId()))
+                    .scheduleId(schedule != null ? String.valueOf(schedule.getScheduleId()) : "")
                     .localVideoPath(content.getLocalVideoPath())
                     .title(title)
                     .description(description)
@@ -204,7 +203,7 @@ public class FastapiScheduler {
                     .build();
 
             try {
-                yu.likelion14th.allligo_was.fastapi.dto.FastapiUploadResponseDto response = fastapiClientService.uploadToYoutube(uploadReq);
+                FastapiUploadResponseDto response = fastapiClientService.uploadToYoutube(uploadReq);
                 if (response != null && "SUCCESS".equalsIgnoreCase(response.getStatus())) {
                     content.setUploadVideoUrl(response.getYoutubeUrl());
                     content.setUploadedAt(LocalDateTime.now());
@@ -213,7 +212,7 @@ public class FastapiScheduler {
                     log.info("Track B: Upload success. YouTube URL saved: {}", response.getYoutubeUrl());
                 }
             } catch (Exception e) {
-                log.error("Track B upload request failed for schedule ID: {}", schedule.getScheduleId(), e);
+                log.error("Track B upload request failed for execution ID: {}", execution.getExecutionId(), e);
             }
         }
     }

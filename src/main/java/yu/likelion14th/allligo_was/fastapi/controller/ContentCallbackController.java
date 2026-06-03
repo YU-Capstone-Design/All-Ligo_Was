@@ -9,15 +9,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import yu.likelion14th.allligo_was.fastapi.dto.FastapiWebhookDto;
 import yu.likelion14th.allligo_was.fastapi.service.ContentCallbackService;
+import yu.likelion14th.allligo_was.fastapi.api.ContentCallbackAPI;
 
 @Slf4j
 @RestController
 @RequestMapping("/api/internal")
 @RequiredArgsConstructor
-public class ContentCallbackController {
+public class ContentCallbackController implements ContentCallbackAPI {
 
     private final ContentCallbackService contentCallbackService;
 
+    @Override
     @PostMapping("/content-callback")
     public ResponseEntity<String> handleContentCallback(@RequestBody FastapiWebhookDto payload) {
         log.info("Webhook received from FastAPI. Task ID: {}", payload.getTaskId());
