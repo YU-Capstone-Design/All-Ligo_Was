@@ -9,16 +9,18 @@ import yu.likelion14th.allligo_was.fastapi.dto.FastapiContentResponseDto;
 import yu.likelion14th.allligo_was.fastapi.dto.FastapiGenerateReqDto;
 
 import yu.likelion14th.allligo_was.fastapi.service.FastapiClientService;
+import yu.likelion14th.allligo_was.fastapi.api.FastapiProxyAPI;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/fastapi")
 @RequiredArgsConstructor
-public class FastapiProxyController {
+public class FastapiProxyController implements FastapiProxyAPI {
 
     private final FastapiClientService fastapiClientService;
 
+    @Override
     @PostMapping(value = "/generate", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<FastapiContentResponseDto> generateContent(
             @ModelAttribute FastapiGenerateReqDto reqDto,
