@@ -41,6 +41,7 @@ agent:
 app:
   backend:
     verify-url: ${BACKEND_VERIFY_URL}
+    base-url: ${BACKEND_URL:http://localhost:8080}
   frontend:
     verify-complete-url: ${FRONTEND_VERIFY_COMPLETE_URL}
 

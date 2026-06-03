@@ -30,7 +30,7 @@ public class PromotionExecutionGeneratorScheduler {
     private final PromotionExecutionRepository promotionExecutionRepository;
 
     // 매시간 0분에 실행
-    @Scheduled(cron = "0 0 * * * *")
+    @Scheduled(cron = "0 1/2 * * * *")
     @Transactional
     public void generateExecutionsForNext7Days() {
         LocalDateTime now = LocalDateTime.now();
