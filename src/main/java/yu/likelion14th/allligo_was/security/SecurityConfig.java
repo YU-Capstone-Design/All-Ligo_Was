@@ -48,7 +48,9 @@ public class SecurityConfig {
                                 "/webjars/**",
                                 "/error",
                                 "/test/*",
-                                "/api/v1/contents/track/**"
+                                "/api/v1/contents/track/**",
+                                "/api/v1/coupons/region",
+                                "/api/v1/coupons/nearby"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
