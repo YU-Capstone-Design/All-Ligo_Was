@@ -17,7 +17,13 @@ import yu.likelion14th.allligo_was.domains.coupon.dto.response.CouponListResDto;
 import yu.likelion14th.allligo_was.domains.coupon.dto.request.CouponUpdateReqDto;
 import yu.likelion14th.allligo_was.S3.dto.UploadDomain;
 import yu.likelion14th.allligo_was.S3.service.S3Service;
+import yu.likelion14th.allligo_was.domains.coupon.dto.response.StoreCouponResponseDto;
+import yu.likelion14th.allligo_was.domains.coupon.dto.response.CouponInfoResponseDto;
+import yu.likelion14th.allligo_was.domains.store.service.StoreService;
 import java.util.List;
+import java.util.Collections;
+import java.util.Map;
+import java.util.stream.Collectors;
 import java.time.LocalDateTime;
 
 @Service
@@ -29,6 +35,7 @@ public class CouponService {
         private final UserRepository userRepository;
         private final StoreRepository storeRepository;
         private final S3Service s3Service;
+        private final StoreService storeService;
 
         @Transactional
         public CouponResDto createCoupon(Long userId, CouponCreateReqDto dto) {
@@ -133,5 +140,44 @@ public class CouponService {
                 if (!coupon.getStore().getStoreId().equals(store.getStoreId())) {
                         throw new CustomException(ErrorCode.FORBIDDEN_COUPON_ACCESS);
                 }
+        }
+
+        public List<StoreCouponResponseDto> getCouponsByRegion(String region) {
+                List<Store> stores = storeService.getStoresByRegion(region);
+                return stores.stream()
+                                .map(store -> {
+                                        List<CouponInfoResponseDto> couponDtos = store.getCoupons().stream()
+                                                        .map(CouponInfoResponseDto::fromEntity)
+                                                        .toList();
+                                        return StoreCouponResponseDto.of(store, couponDtos);
+                                })
+                                .toList();
+        }
+
+        public List<StoreCouponResponseDto> getNearbyCoupons(Double latitude, Double longitude) {
+                List<Store> stores = storeService.getNearbyStores(latitude, longitude);
+                if (stores.isEmpty()) {
+                        return Collections.emptyList();
+                }
+
+                List<Coupon> coupons = couponRepository.findAllByStoreIn(stores);
+                Map<Long, List<CouponInfoResponseDto>> storeCouponMap = coupons.stream()
+                                .collect(Collectors.groupingBy(
+                                                coupon -> coupon.getStore().getStoreId(),
+                                                Collectors.mapping(
+                                                                CouponInfoResponseDto::fromEntity,
+                                                                Collectors.toList()
+                                                )
+                                ));
+
+                return stores.stream()
+                                .map(store -> {
+                                        List<CouponInfoResponseDto> couponDtos = storeCouponMap.getOrDefault(
+                                                        store.getStoreId(),
+                                                        Collections.emptyList()
+                                        );
+                                        return StoreCouponResponseDto.of(store, couponDtos);
+                                })
+                                .toList();
         }
 }
