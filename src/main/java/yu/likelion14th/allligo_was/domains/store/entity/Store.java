@@ -61,6 +61,10 @@ public class Store {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Coupon> coupons = new ArrayList<>();
+
     public void updateProfile(String storeName, String mapUrl, Double latitude, Double longitude) {
         this.storeName = storeName;
         this.mapUrl = mapUrl;
