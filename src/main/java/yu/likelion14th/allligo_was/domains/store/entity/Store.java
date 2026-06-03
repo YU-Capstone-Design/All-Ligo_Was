@@ -8,13 +8,18 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.CascadeType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import yu.likelion14th.allligo_was.domains.coupon.entity.Coupon;
 import yu.likelion14th.allligo_was.domains.user.entity.User;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.ArrayList;
 
 @Entity
 @Getter
@@ -29,6 +34,10 @@ public class Store {
 
     @Column(name = "store_name", nullable = false)
     private String storeName;
+
+    // 서울, 인천, 경기, 강원, 대전, 세종, 충남, 충북, 대구, 경북, 부산, 울산, 경남, 광주, 전남, 전북, 제주 만 가능
+    @Column(name = "region", nullable = false)
+    private String region;
 
     @Column(name = "latitude", nullable = false)
     private Double latitude;
