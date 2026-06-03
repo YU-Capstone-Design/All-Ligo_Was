@@ -25,12 +25,12 @@ public class TagLog {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long tagLogId;
 
     @Column(name="clicked_at", nullable = false)
     private LocalDateTime clickedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="promotion_tag", nullable = false)
+    @JoinColumn(name="tag_id", nullable = false)
     private PromotionTag promotionTag;
 }
