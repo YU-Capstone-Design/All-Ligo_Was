@@ -49,8 +49,8 @@ public class FastapiScheduler {
         // 기존 로직: 1시간 전 생성 요청 (운영용)
         // LocalDateTime oneHourLater = now.plusHours(1);
         
-        // 테스트 로직: 2분 전 생성 요청 (테스트용, 테스트 완료 후 위 주석 해제 및 본 줄 삭제)
-        LocalDateTime oneHourLater = now.plusMinutes(2);
+        // 테스트 로직: 5분 전 생성 요청 (테스트용, 테스트 완료 후 위 주석 해제 및 본 줄 삭제)
+        LocalDateTime oneHourLater = now.plusMinutes(5);
 
         log.info("Two-Track Scheduler Running... now: {}, oneHourLater: {}", now, oneHourLater);
 
