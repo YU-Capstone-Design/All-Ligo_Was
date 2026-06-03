@@ -15,6 +15,9 @@ public interface PromotionExecutionRepository extends JpaRepository<PromotionExe
     Optional<PromotionExecution> findByTaskId(String taskId);
     boolean existsByPromotionScheduleAndExecutedAt(PromotionSchedule schedule, LocalDateTime executedAt);
 
+    List<PromotionExecution> findAllByStatusAndExecutedAtBetween(String status, LocalDateTime start, LocalDateTime end);
+    List<PromotionExecution> findAllByExecutedAtBetween(LocalDateTime start, LocalDateTime end);
+
     void deleteAllByPromotionPromotionId(Long promotionId);
 
     @Query("""
