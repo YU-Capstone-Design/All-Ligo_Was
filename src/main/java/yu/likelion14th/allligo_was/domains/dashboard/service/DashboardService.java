@@ -231,16 +231,16 @@ public class DashboardService {
                         row -> ((Number) row[1]).longValue()
                 ));
 
-        Long blogCount = countMap.getOrDefault("BLOG", 0L);
+        Long postCount = countMap.getOrDefault("POST", 0L);
         Long videoCount = countMap.getOrDefault("VIDEO", 0L);
-        Long total = blogCount + videoCount;
+        Long total = postCount + videoCount;
 
-        int blogRatio = total == 0 ? 0 : (int) Math.round((blogCount * 100.0) / total);
-        int videoRatio = total == 0 ? 0 : 100 - blogRatio;
+        int postRatio = total == 0 ? 0 : (int) Math.round((postCount * 100.0) / total);
+        int videoRatio = total == 0 ? 0 : 100 - postRatio;
 
         return DashboardStatisticsResDto.ContentTypeClickStatisticsDto.builder()
                 .contentTypeRatios(List.of(
-                        buildContentType("BLOG", "블로그", blogCount, blogRatio),
+                        buildContentType("POST", "게시글", postCount, postRatio),
                         buildContentType("VIDEO", "인스타그램", videoCount, videoRatio)
                 ))
                 .build();

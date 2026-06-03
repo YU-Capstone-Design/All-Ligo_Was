@@ -31,7 +31,7 @@ public enum ErrorCode {
     PROMOTION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 홍보 요청을 찾을 수 없습니다."),
     PROMOTION_ACCESS_DENIED(HttpStatus.FORBIDDEN, "해당 홍보 요청에 접근할 권한이 없습니다."),
     INVALID_PROMOTION_TITLE(HttpStatus.BAD_REQUEST, "홍보 제목은 3자 이상, 20자 이하로 입력해주세요."),
-    INVALID_PROMOTION_CONTENT_TYPE(HttpStatus.BAD_REQUEST, "콘텐츠 타입은 BLOG 또는 VIDEO만 가능합니다."),
+    INVALID_PROMOTION_CONTENT_TYPE(HttpStatus.BAD_REQUEST, "콘텐츠 타입은 POST 또는 VIDEO만 가능합니다."),
     INVALID_PROMOTION_PROMPT(HttpStatus.BAD_REQUEST, "추가 프롬프트는 250자 이하로 입력해주세요."),
     INVALID_PROMOTION_IMAGE_COUNT(HttpStatus.BAD_REQUEST, "이미지는 1장 이상 5장 이하로 등록해야 합니다."),
     INVALID_PROMOTION_TAG_COUNT(HttpStatus.BAD_REQUEST, "해시태그는 10개 미만으로 등록해야 합니다."),

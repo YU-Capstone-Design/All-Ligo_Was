@@ -54,10 +54,10 @@ public interface DashboardAPI {
             - 태그 클릭 데이터가 없으면 빈 배열을 반환합니다.
 
             콘텐츠 유형별 클릭 비율 정책:
-            - BLOG와 VIDEO 기준으로 반환합니다.
-            - BLOG label은 블로그입니다.
+            - POST와 VIDEO 기준으로 반환합니다.
+            - POST label은 게시글입니다.
             - VIDEO label은 인스타그램입니다.
-            - 클릭 데이터가 없어도 BLOG, VIDEO 두 항목은 항상 반환합니다.
+            - 클릭 데이터가 없어도 POST, VIDEO 두 항목은 항상 반환합니다.
             - 클릭 데이터가 없으면 clickCount와 ratio는 0입니다.
 
             Swagger 상단의 Authorize 버튼에 Bearer 토큰을 입력한 후 요청해야 합니다.
@@ -153,8 +153,8 @@ public interface DashboardAPI {
                       "contentTypeClickStatistics": {
                         "contentTypeRatios": [
                           {
-                            "contentType": "BLOG",
-                            "label": "블로그",
+                            "contentType": "POST",
+                            "label": "게시글",
                             "clickCount": 64,
                             "ratio": 64
                           },

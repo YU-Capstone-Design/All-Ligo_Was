@@ -28,7 +28,7 @@ public interface PromotionAPI {
                     로그인한 소상공인이 홍보 콘텐츠 생성을 요청합니다.
                     홍보 제목, 콘텐츠 타입, 프롬프트, 날씨 사용 여부, 분위기 태그, 마감일, 이미지 URL, 해시태그, 스케줄 정보를 함께 등록합니다.
 
-                    contentType은 BLOG 또는 VIDEO만 가능합니다.
+                    contentType은 POST 또는 VIDEO만 가능합니다.
                     mode는 따뜻함, 차분함, 밝음 중 하나만 가능합니다.
                     imageUrls는 1장 이상 5장 이하입니다.
                     tags는 10개 미만이며, 각 태그는 7자 이하입니다.
@@ -39,7 +39,7 @@ public interface PromotionAPI {
             @ApiResponse(responseCode = "201", description = "홍보 요청 생성 성공", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
                     {
                       "promotionId": 1,
-                      "contentType": "BLOG",
+                      "contentType": "POST",
                       "promotionTitle": "비오는날커피홍보",
                       "prompt": "비 오는 날 따뜻한 라떼 할인 이벤트를 홍보하는 블로그 글을 만들어줘",
                       "weatherEnabled": true,
@@ -69,7 +69,7 @@ public interface PromotionAPI {
                     @ExampleObject(name = "콘텐츠 타입 오류", value = """
                             {
                               "status": 400,
-                              "message": "콘텐츠 타입은 BLOG 또는 VIDEO만 가능합니다."
+                              "message": "콘텐츠 타입은 POST 또는 VIDEO만 가능합니다."
                             }
                             """),
                     @ExampleObject(name = "분위기 태그 오류", value = """
@@ -124,7 +124,7 @@ public interface PromotionAPI {
                         "promotionTitle": "비오는날커피홍보",
                         "thumbnailImageUrl": "https://all-ligo-images.s3.ap-northeast-2.amazonaws.com/promotion/test/promotion_image1.jpg",
                         "createdAt": "2026-06-02T20:40:00",
-                        "contentType": "BLOG"
+                        "contentType": "POST"
                       }
                     ]
                     """)))
@@ -143,7 +143,7 @@ public interface PromotionAPI {
             @ApiResponse(responseCode = "200", description = "홍보 요청 상세 조회 성공", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
                     {
                       "promotionId": 1,
-                      "contentType": "BLOG",
+                      "contentType": "POST",
                       "promotionTitle": "비오는날커피홍보",
                       "prompt": "비 오는 날 따뜻한 라떼 할인 이벤트를 홍보하는 블로그 글을 만들어줘",
                       "weatherEnabled": true,
@@ -195,7 +195,7 @@ public interface PromotionAPI {
             @ApiResponse(responseCode = "200", description = "홍보 요청 수정 성공", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
                     {
                       "promotionId": 1,
-                      "contentType": "BLOG",
+                      "contentType": "POST",
                       "promotionTitle": "수정된커피홍보",
                       "prompt": "비 오는 날 방문 고객을 대상으로 따뜻한 라떼 할인 이벤트를 홍보하는 글을 만들어줘",
                       "weatherEnabled": true,

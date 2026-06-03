@@ -23,7 +23,7 @@ public class PromotionDetailResDto {
     @Schema(description = "홍보 요청 ID", example = "1")
     private Long promotionId;
 
-    @Schema(description = "콘텐츠 타입", example = "BLOG")
+    @Schema(description = "콘텐츠 타입", example = "POST")
     private String contentType;
 
     @Schema(description = "홍보물 제목", example = "비오는날커피홍보")
