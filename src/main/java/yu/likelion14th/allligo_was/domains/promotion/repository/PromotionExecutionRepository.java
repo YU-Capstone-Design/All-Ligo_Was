@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.repository.query.Param;
 import yu.likelion14th.allligo_was.domains.promotion.entity.PromotionExecution;
 import yu.likelion14th.allligo_was.domains.promotion.entity.PromotionSchedule;
@@ -19,6 +20,14 @@ public interface PromotionExecutionRepository extends JpaRepository<PromotionExe
     List<PromotionExecution> findAllByExecutedAtBetween(LocalDateTime start, LocalDateTime end);
 
     void deleteAllByPromotionPromotionId(Long promotionId);
+
+    @Modifying
+    @Query("DELETE FROM PromotionExecution pe WHERE pe.promotion.promotionId = :promotionId AND pe.status = 'PENDING'")
+    void deletePendingExecutionsByPromotionId(@Param("promotionId") Long promotionId);
+
+    @Modifying
+    @Query("UPDATE PromotionExecution pe SET pe.promotionSchedule = null WHERE pe.promotion.promotionId = :promotionId")
+    void nullifyScheduleIdByPromotionId(@Param("promotionId") Long promotionId);
 
     @Query("""
         SELECT DISTINCT pe

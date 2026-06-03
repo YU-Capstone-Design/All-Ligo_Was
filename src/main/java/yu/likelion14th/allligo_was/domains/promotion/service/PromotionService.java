@@ -174,6 +174,9 @@ public class PromotionService {
 
         promotionImageRepository.deleteAllByPromotionPromotionId(promotionId);
         promotionTagRepository.deleteAllByPromotionPromotionId(promotionId);
+        
+        promotionExecutionRepository.deletePendingExecutionsByPromotionId(promotionId);
+        promotionExecutionRepository.nullifyScheduleIdByPromotionId(promotionId);
         promotionScheduleRepository.deleteAllByPromotionPromotionId(promotionId);
 
         List<PromotionImage> savedImages = saveImages(promotion, request.getImageUrls());
