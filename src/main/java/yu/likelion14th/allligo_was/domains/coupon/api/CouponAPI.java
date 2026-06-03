@@ -16,169 +16,175 @@ import yu.likelion14th.allligo_was.domains.coupon.dto.request.CouponUpdateReqDto
 @Tag(name = "Coupon API", description = "쿠폰 등록 및 관리 관련 API입니다.")
 public interface CouponAPI {
 
-        @Operation(summary = "쿠폰 등록", description = """
-                        로그인한 소상공인이 쿠폰을 등록합니다.
-                        쿠폰 이미지는 프론트가 S3에 직접 업로드한 뒤, 업로드 완료된 imageUrl을 요청 Body에 담아 전달합니다.
-                        Swagger 상단의 Authorize 버튼에 Bearer 토큰을 입력한 후 요청해야 합니다.
-                        """)
-        @ApiResponses({
-                        @ApiResponse(responseCode = "200", description = "쿠폰 등록 성공", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                                        {
-                                          "couponId": 1,
-                                          "imageUrl": "https://all-ligo-images.s3.ap-northeast-2.amazonaws.com/coupon/example.png",
-                                          "menuName": "아메리카노",
-                                          "discountNum": 1000,
-                                          "discountType": "AMOUNT",
-                                          "message": "쿠폰이 등록되었습니다."
-                                        }
-                                        """))),
-                        @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(mediaType = "application/json", examples = {
-                                        @ExampleObject(name = "이미지 URL 오류", value = """
-                                                        {
-                                                          "status": 400,
-                                                          "message": "쿠폰 이미지 URL이 유효하지 않습니다."
-                                                        }
-                                                        """),
-                                        @ExampleObject(name = "필수값 누락", value = """
-                                                        {
-                                                          "status": 400,
-                                                          "message": "메뉴명은 필수 입력입니다."
-                                                        }
-                                                        """)
-                        })),
-                        @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                                        {
-                                          "status": 401,
-                                          "message": "인증에 실패하였습니다."
-                                        }
-                                        """))),
-                        @ApiResponse(responseCode = "404", description = "사용자 또는 매장 정보 없음", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                                        {
-                                          "status": 404,
-                                          "message": "매장 정보를 찾을 수 없습니다."
-                                        }
-                                        """)))
-        })
-        ResponseEntity<?> createCoupon(
-                        @Valid @RequestBody CouponCreateReqDto dto);
+  @Operation(summary = "쿠폰 등록", description = """
+      로그인한 소상공인이 쿠폰을 등록합니다.
+      쿠폰 이미지는 S3 Presigned URL 발급 API에서 domain을 COUPON으로 요청한 뒤,
+      응답으로 받은 presignedUrl에 프론트가 직접 PUT 업로드합니다.
+      업로드 성공 후 응답으로 받은 fileUrl을 요청 Body의 imageUrl에 담아 전달합니다.
+      imageUrl은 coupon/{userId}/... 경로의 S3 URL이어야 합니다.
+      Swagger 상단의 Authorize 버튼에 Bearer 토큰을 입력한 후 요청해야 합니다.
+      """)
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "쿠폰 등록 성공", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+          {
+            "couponId": 1,
+            "imageUrl": "https://all-ligo-images.s3.ap-northeast-2.amazonaws.com/coupon/3/2e208521-86c3-4c9f-8c84-7cd4c05ecdc4.png",
+            "menuName": "아메리카노",
+            "discountNum": 1000,
+            "discountType": "AMOUNT",
+            "message": "쿠폰이 등록되었습니다."
+          }
+          """))),
+      @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(mediaType = "application/json", examples = {
+          @ExampleObject(name = "이미지 URL 오류", value = """
+              {
+                "status": 400,
+                "message": "허용되지 않은 파일 URL입니다."
+              }
+              """),
+          @ExampleObject(name = "필수값 누락", value = """
+              {
+                "status": 400,
+                "message": "메뉴명은 필수 입력입니다."
+              }
+              """)
+      })),
+      @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+          {
+            "status": 401,
+            "message": "인증에 실패하였습니다."
+          }
+          """))),
+      @ApiResponse(responseCode = "404", description = "사용자 또는 매장 정보 없음", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+          {
+            "status": 404,
+            "message": "매장 정보를 찾을 수 없습니다."
+          }
+          """)))
+  })
+  ResponseEntity<?> createCoupon(
+      @Valid @RequestBody CouponCreateReqDto dto);
 
-        @Operation(summary = "내 쿠폰 목록 조회", description = """
-                        로그인한 소상공인이 등록한 쿠폰 목록을 조회합니다.
-                        Swagger 상단의 Authorize 버튼에 Bearer 토큰을 입력한 후 요청해야 합니다.
-                        """)
-        @ApiResponses({
-                        @ApiResponse(responseCode = "200", description = "내 쿠폰 목록 조회 성공", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                                        [
-                                          {
-                                            "couponId": 1,
-                                            "imageUrl": "https://all-ligo-images.s3.ap-northeast-2.amazonaws.com/coupon/example.png",
-                                            "menuName": "아메리카노",
-                                            "discountNum": 1000,
-                                            "discountType": "AMOUNT"
-                                          },
-                                          {
-                                            "couponId": 2,
-                                            "imageUrl": "https://all-ligo-images.s3.ap-northeast-2.amazonaws.com/coupon/latte.png",
-                                            "menuName": "카페라떼",
-                                            "discountNum": 10,
-                                            "discountType": "RATE"
-                                          }
-                                        ]
-                                        """))),
-                        @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                                        {
-                                          "status": 401,
-                                          "message": "인증에 실패하였습니다."
-                                        }
-                                        """))),
-                        @ApiResponse(responseCode = "404", description = "사용자 또는 매장 정보 없음", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                                        {
-                                          "status": 404,
-                                          "message": "매장 정보를 찾을 수 없습니다."
-                                        }
-                                        """)))
-        })
-        ResponseEntity<?> getMyCoupons();
+  @Operation(summary = "내 쿠폰 목록 조회", description = """
+      로그인한 소상공인이 등록한 쿠폰 목록을 조회합니다.
+      Swagger 상단의 Authorize 버튼에 Bearer 토큰을 입력한 후 요청해야 합니다.
+      """)
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "내 쿠폰 목록 조회 성공", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+          [
+            {
+              "couponId": 1,
+              "imageUrl": "https://all-ligo-images.s3.ap-northeast-2.amazonaws.com/coupon/3/2e208521-86c3-4c9f-8c84-7cd4c05ecdc4.png",
+              "menuName": "아메리카노",
+              "discountNum": 1000,
+              "discountType": "AMOUNT"
+            },
+            {
+              "couponId": 2,
+              "imageUrl": "https://all-ligo-images.s3.ap-northeast-2.amazonaws.com/coupon/3/7b83c02a-5f32-49f4-8c12-2a4f7fb8431d.png",
+              "menuName": "카페라떼",
+              "discountNum": 10,
+              "discountType": "RATE"
+            }
+          ]
+          """))),
+      @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+          {
+            "status": 401,
+            "message": "인증에 실패하였습니다."
+          }
+          """))),
+      @ApiResponse(responseCode = "404", description = "사용자 또는 매장 정보 없음", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+          {
+            "status": 404,
+            "message": "매장 정보를 찾을 수 없습니다."
+          }
+          """)))
+  })
+  ResponseEntity<?> getMyCoupons();
 
-        @Operation(summary = "쿠폰 수정", description = """
-                        로그인한 소상공인이 본인이 등록한 쿠폰 정보를 수정합니다.
-                        쿠폰 이미지는 프론트가 S3에 직접 업로드한 뒤, 업로드 완료된 imageUrl을 요청 Body에 담아 전달합니다.
-                        Swagger 상단의 Authorize 버튼에 Bearer 토큰을 입력한 후 요청해야 합니다.
-                        """)
-        @ApiResponses({
-                        @ApiResponse(responseCode = "200", description = "쿠폰 수정 성공", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                                        {
-                                          "couponId": 1,
-                                          "imageUrl": "https://all-ligo-images.s3.ap-northeast-2.amazonaws.com/coupon/updated.png",
-                                          "menuName": "카페라떼",
-                                          "discountNum": 10,
-                                          "discountType": "RATE",
-                                          "message": "쿠폰이 수정되었습니다."
-                                        }
-                                        """))),
-                        @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                                        {
-                                          "status": 400,
-                                          "message": "쿠폰 이미지 URL이 유효하지 않습니다."
-                                        }
-                                        """))),
-                        @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                                        {
-                                          "status": 401,
-                                          "message": "인증에 실패하였습니다."
-                                        }
-                                        """))),
-                        @ApiResponse(responseCode = "403", description = "본인 쿠폰이 아님", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                                        {
-                                          "status": 403,
-                                          "message": "해당 쿠폰에 접근할 수 없습니다."
-                                        }
-                                        """))),
-                        @ApiResponse(responseCode = "404", description = "쿠폰 없음", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                                        {
-                                          "status": 404,
-                                          "message": "쿠폰을 찾을 수 없습니다."
-                                        }
-                                        """)))
-        })
-        ResponseEntity<?> updateCoupon(
-                        @PathVariable("couponId") Long couponId,
-                        @Valid @RequestBody CouponUpdateReqDto dto);
+  @Operation(summary = "쿠폰 수정", description = """
+      로그인한 소상공인이 본인이 등록한 쿠폰 정보를 수정합니다.
+      쿠폰 이미지는 S3 Presigned URL 발급 API에서 domain을 COUPON으로 요청한 뒤,
+      응답으로 받은 presignedUrl에 프론트가 직접 PUT 업로드합니다.
+      업로드 성공 후 응답으로 받은 fileUrl을 요청 Body의 imageUrl에 담아 전달합니다.
+      imageUrl은 coupon/{userId}/... 경로의 S3 URL이어야 합니다.
+      Swagger 상단의 Authorize 버튼에 Bearer 토큰을 입력한 후 요청해야 합니다.
+      """)
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "쿠폰 수정 성공", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+          {
+            "couponId": 1,
+            "imageUrl": "https://all-ligo-images.s3.ap-northeast-2.amazonaws.com/coupon/3/9f1e8f3a-0e3b-4c4a-9b11-6a9f5a7b8c31.png",
+            "menuName": "카페라떼",
+            "discountNum": 10,
+            "discountType": "RATE",
+            "message": "쿠폰이 수정되었습니다."
+          }
+          """))),
+      @ApiResponse(responseCode = "400", description = "잘못된 요청", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+          {
+            "status": 400,
+            "message": "허용되지 않은 파일 URL입니다."
+          }
+          """))),
+      @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+          {
+            "status": 401,
+            "message": "인증에 실패하였습니다."
+          }
+          """))),
+      @ApiResponse(responseCode = "403", description = "본인 쿠폰이 아님", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+          {
+            "status": 403,
+            "message": "해당 쿠폰에 접근할 수 없습니다."
+          }
+          """))),
+      @ApiResponse(responseCode = "404", description = "쿠폰 없음", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+          {
+            "status": 404,
+            "message": "쿠폰을 찾을 수 없습니다."
+          }
+          """)))
+  })
+  ResponseEntity<?> updateCoupon(
+      @PathVariable("couponId") Long couponId,
+      @Valid @RequestBody CouponUpdateReqDto dto);
 
-        @Operation(summary = "쿠폰 삭제", description = """
-                        로그인한 소상공인이 본인이 등록한 쿠폰을 삭제합니다.
-                        Swagger 상단의 Authorize 버튼에 Bearer 토큰을 입력한 후 요청해야 합니다.
-                        """)
-        @ApiResponses({
-                        @ApiResponse(responseCode = "200", description = "쿠폰 삭제 성공", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                                        {
-                                          "couponId": 1,
-                                          "imageUrl": "https://all-ligo-images.s3.ap-northeast-2.amazonaws.com/coupon/updated.png",
-                                          "menuName": "카페라떼",
-                                          "discountNum": 10,
-                                          "discountType": "RATE",
-                                          "message": "쿠폰이 삭제되었습니다."
-                                        }
-                                        """))),
-                        @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                                        {
-                                          "status": 401,
-                                          "message": "인증에 실패하였습니다."
-                                        }
-                                        """))),
-                        @ApiResponse(responseCode = "403", description = "본인 쿠폰이 아님", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                                        {
-                                          "status": 403,
-                                          "message": "해당 쿠폰에 접근할 수 없습니다."
-                                        }
-                                        """))),
-                        @ApiResponse(responseCode = "404", description = "쿠폰 없음", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
-                                        {
-                                          "status": 404,
-                                          "message": "쿠폰을 찾을 수 없습니다."
-                                        }
-                                        """)))
-        })
-        ResponseEntity<?> deleteCoupon(
-                        @PathVariable("couponId") Long couponId);
+  @Operation(summary = "쿠폰 삭제", description = """
+      로그인한 소상공인이 본인이 등록한 쿠폰을 삭제합니다.
+      Swagger 상단의 Authorize 버튼에 Bearer 토큰을 입력한 후 요청해야 합니다.
+      """)
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "쿠폰 삭제 성공", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+          {
+            "couponId": 1,
+            "imageUrl": "https://all-ligo-images.s3.ap-northeast-2.amazonaws.com/coupon/3/9f1e8f3a-0e3b-4c4a-9b11-6a9f5a7b8c31.png",
+            "menuName": "카페라떼",
+            "discountNum": 10,
+            "discountType": "RATE",
+            "message": "쿠폰이 삭제되었습니다."
+          }
+          """))),
+      @ApiResponse(responseCode = "401", description = "인증 실패", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+          {
+            "status": 401,
+            "message": "인증에 실패하였습니다."
+          }
+          """))),
+      @ApiResponse(responseCode = "403", description = "본인 쿠폰이 아님", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+          {
+            "status": 403,
+            "message": "해당 쿠폰에 접근할 수 없습니다."
+          }
+          """))),
+      @ApiResponse(responseCode = "404", description = "쿠폰 없음", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+          {
+            "status": 404,
+            "message": "쿠폰을 찾을 수 없습니다."
+          }
+          """)))
+  })
+  ResponseEntity<?> deleteCoupon(
+      @PathVariable("couponId") Long couponId);
 }
