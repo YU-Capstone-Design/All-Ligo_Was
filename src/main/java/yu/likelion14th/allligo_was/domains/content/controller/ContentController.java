@@ -22,48 +22,44 @@ import yu.likelion14th.allligo_was.domains.content.dto.response.ContentPreviewRe
 @RequestMapping("/api/v1/contents")
 public class ContentController implements ContentAPI {
 
-    private final ContentService contentService;
-    private final ContentManageService contentManageService;
+        private final ContentService contentService;
+        private final ContentManageService contentManageService;
 
-    @Override
-    @GetMapping("/track/{contentId}")
-    public ResponseEntity<Void> trackAndRedirect(@PathVariable Long contentId){
-        // 외부(소상공인) URL로 리다이렉트 응답 생성 (Location 헤더 + 302 Found)
-        return ResponseEntity.status(HttpStatus.FOUND)
-                .location(URI.create(contentService.trackAndRedirect(contentId)))
-                .build();
-    }
+        @Override
+        @GetMapping("/track/{contentId}")
+        public ResponseEntity<Void> trackAndRedirect(
+                        @PathVariable("contentId") Long contentId) {
+                return ResponseEntity.status(HttpStatus.FOUND)
+                                .location(URI.create(contentService.trackAndRedirect(contentId)))
+                                .build();
+        }
 
-    @Override
-    @GetMapping("/{contentId}/preview")
-    public ResponseEntity<ContentPreviewResDto> getContentPreview(
-            @PathVariable Long contentId
-    ) {
-        Long userId = getCurrentUserId();
+        @Override
+        @GetMapping("/{contentId}/preview")
+        public ResponseEntity<ContentPreviewResDto> getContentPreview(
+                        @PathVariable("contentId") Long contentId) {
+                Long userId = getCurrentUserId();
 
-        ContentPreviewResDto response =
-                contentManageService.getContentPreview(userId, contentId);
+                ContentPreviewResDto response = contentManageService.getContentPreview(userId, contentId);
 
-        return ResponseEntity.ok(response);
-    }
+                return ResponseEntity.ok(response);
+        }
 
-    @Override
-    @PatchMapping("/{contentId}/cancel")
-    public ResponseEntity<ContentCancelResDto> cancelContent(
-            @PathVariable Long contentId
-    ) {
-        Long userId = getCurrentUserId();
+        @Override
+        @PatchMapping("/{contentId}/cancel")
+        public ResponseEntity<ContentCancelResDto> cancelContent(
+                        @PathVariable("contentId") Long contentId) {
+                Long userId = getCurrentUserId();
 
-        ContentCancelResDto response =
-                contentManageService.cancelContent(userId, contentId);
+                ContentCancelResDto response = contentManageService.cancelContent(userId, contentId);
 
-        return ResponseEntity.ok(response);
-    }
+                return ResponseEntity.ok(response);
+        }
 
-    private Long getCurrentUserId() {
-        return (Long) SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
-    }
+        private Long getCurrentUserId() {
+                return (Long) SecurityContextHolder.getContext()
+                                .getAuthentication()
+                                .getPrincipal();
+        }
 
 }
