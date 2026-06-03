@@ -43,4 +43,7 @@ public class FastapiGenerateReqDto {
     @Builder.Default
     @JsonProperty("imageUrls")
     private List<String> imageUrls = new ArrayList<>(); // S3 이미지 링크 리스트
+    
+    @JsonProperty("topPerformers")
+    private String topPerformers; // JSON 직렬화된 과거 우수 성과 데이터 문자열
 }

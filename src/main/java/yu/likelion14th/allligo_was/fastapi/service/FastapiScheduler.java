@@ -25,6 +25,9 @@ import yu.likelion14th.allligo_was.domains.store.repository.StoreRepository;
 import yu.likelion14th.allligo_was.domains.store.entity.Store;
 import yu.likelion14th.allligo_was.domains.promotion.entity.PromotionTag;
 import yu.likelion14th.allligo_was.fastapi.dto.FastapiUploadResponseDto;
+import yu.likelion14th.allligo_was.fastapi.dto.TopPerformerDto;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.ArrayList;
 import java.util.stream.Collectors;
@@ -107,6 +110,55 @@ public class FastapiScheduler {
                 } else {
                     reqDto.setMode(dbMode.toUpperCase().trim());
                 }
+
+                // --- Top 3 과거 우수 성과 콘텐츠 조회 및 매핑 ---
+                try {
+                    Long userId = promotion.getUser().getUserId();
+                    List<Object[]> topContentsRaw = contentRepository.findTopContentsWithClickCountByUserId(userId, PageRequest.of(0, 3));
+                    List<TopPerformerDto> topPerformers = new ArrayList<>();
+                    
+                    for (Object[] row : topContentsRaw) {
+                        Content topContent = (Content) row[0];
+                        Long countLong = (Long) row[1];
+                        Integer clickCount = countLong != null ? countLong.intValue() : 0;
+                        
+                        String marketingText = "";
+                        if (topContent.getCaption() != null && !topContent.getCaption().isBlank()) {
+                            marketingText = topContent.getCaption();
+                        } else if (topContent.getBodyText() != null && !topContent.getBodyText().isBlank()) {
+                            marketingText = topContent.getBodyText();
+                        }
+                        
+                        if (marketingText.length() > 500) {
+                            marketingText = marketingText.substring(0, 500);
+                        }
+                        
+                        List<String> tags = new ArrayList<>();
+                        if (topContent.getPromotionExecution() != null && topContent.getPromotionExecution().getPromotion() != null) {
+                            List<PromotionTag> pTags = promotionTagRepository.findAllByPromotion(topContent.getPromotionExecution().getPromotion());
+                            if (pTags != null) {
+                                tags = pTags.stream().map(PromotionTag::getTagName).collect(Collectors.toList());
+                            }
+                        }
+                        
+                        topPerformers.add(TopPerformerDto.builder()
+                                .clickCount(clickCount)
+                                .marketingText(marketingText)
+                                .tags(tags)
+                                .build());
+                    }
+                    
+                    if (!topPerformers.isEmpty()) {
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        String topPerformersJson = objectMapper.writeValueAsString(topPerformers);
+                        reqDto.setTopPerformers(topPerformersJson);
+                        log.info("Top Performers JSON payload for user {}: {}", userId, topPerformersJson);
+                    }
+                } catch (Exception e) {
+                    log.error("Failed to fetch top performers for execution ID: {}", execution.getExecutionId(), e);
+                }
+                // --- 매핑 끝 ---
+
             } else {
                 reqDto.setImageUrls(new ArrayList<>());
                 reqDto.setContentType("IMAGE");
