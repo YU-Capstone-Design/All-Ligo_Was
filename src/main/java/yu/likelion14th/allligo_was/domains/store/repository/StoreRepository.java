@@ -13,12 +13,13 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
 
     Optional<Store> findByUser(User user);
 
-    @Query("select distinct s from Store s left join fetch s.coupons where s.region = :region")
-    List<Store> findAllByRegionWithCoupons(@Param("region") String region);
+    @Query("select distinct s from Store s join s.coupons where s.region = :region")
+    List<Store> findAllByRegionHavingCoupons(@Param("region") String region);
 
-    @Query(value = "SELECT * FROM store s " +
+    @Query(value = "SELECT DISTINCT s.* FROM store s " +
+                   "INNER JOIN coupon c ON s.store_id = c.store_id " +
                    "WHERE ST_Distance_Sphere(POINT(s.longitude, s.latitude), POINT(?2, ?1)) <= 3000 " +
                    "ORDER BY ST_Distance_Sphere(POINT(s.longitude, s.latitude), POINT(?2, ?1)) ASC",
            nativeQuery = true)
-    List<Store> findNearbyStores(@Param("latitude") Double latitude, @Param("longitude") Double longitude);
+    List<Store> findNearbyStoresHavingCoupons(@Param("latitude") Double latitude, @Param("longitude") Double longitude);
 }
