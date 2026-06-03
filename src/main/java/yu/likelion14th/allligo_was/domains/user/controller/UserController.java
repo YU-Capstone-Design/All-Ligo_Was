@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import yu.likelion14th.allligo_was.domains.user.api.UserAPI;
 import yu.likelion14th.allligo_was.domains.user.dto.request.UserProfileUpdateReqDto;
 import yu.likelion14th.allligo_was.domains.user.service.UserService;
+import yu.likelion14th.allligo_was.domains.user.dto.request.UserProfileImageUpdateReqDto;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,8 +27,7 @@ public class UserController implements UserAPI {
     @Override
     @PatchMapping("/me/profile")
     public ResponseEntity<?> updateProfile(
-            @Valid @RequestBody UserProfileUpdateReqDto dto
-    ) {
+            @Valid @RequestBody UserProfileUpdateReqDto dto) {
         Long userId = getCurrentUserId();
         return ResponseEntity.ok(userService.updateProfile(userId, dto));
     }
@@ -36,5 +36,13 @@ public class UserController implements UserAPI {
         return (Long) SecurityContextHolder.getContext()
                 .getAuthentication()
                 .getPrincipal();
+    }
+
+    @Override
+    @PatchMapping("/me/profile-image")
+    public ResponseEntity<?> updateProfileImage(
+            @Valid @RequestBody UserProfileImageUpdateReqDto dto) {
+        Long userId = getCurrentUserId();
+        return ResponseEntity.ok(userService.updateProfileImage(userId, dto));
     }
 }

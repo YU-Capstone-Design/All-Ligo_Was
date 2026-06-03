@@ -27,25 +27,25 @@ public class Store {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long storeId;
 
-    @Column(name="store_name", nullable = false)
+    @Column(name = "store_name", nullable = false)
     private String storeName;
 
-    @Column(name="latitude", nullable = false)
+    @Column(name = "latitude", nullable = false)
     private Double latitude;
 
-    @Column(name="longitude", nullable = false)
+    @Column(name = "longitude", nullable = false)
     private Double longitude;
 
-    @Column(length=2048, name="map_url", nullable = false)
+    @Column(length = 2048, name = "map_url", nullable = false)
     private String mapUrl;
 
     @Column(name = "profile_image_url", length = 500)
     private String profileImageUrl;
 
-    @Column(name="created_at", nullable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name="updated_at")
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -57,6 +57,11 @@ public class Store {
         this.mapUrl = mapUrl;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public void updateProfileImage(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
         this.updatedAt = LocalDateTime.now();
     }
 }

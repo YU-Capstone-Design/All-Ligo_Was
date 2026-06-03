@@ -15,6 +15,8 @@ import yu.likelion14th.allligo_was.exception.CustomException;
 import yu.likelion14th.allligo_was.exception.ErrorCode;
 import yu.likelion14th.allligo_was.domains.coupon.dto.response.CouponListResDto;
 import yu.likelion14th.allligo_was.domains.coupon.dto.request.CouponUpdateReqDto;
+import yu.likelion14th.allligo_was.S3.dto.UploadDomain;
+import yu.likelion14th.allligo_was.S3.service.S3Service;
 import java.util.List;
 import java.time.LocalDateTime;
 
@@ -26,6 +28,7 @@ public class CouponService {
         private final CouponRepository couponRepository;
         private final UserRepository userRepository;
         private final StoreRepository storeRepository;
+        private final S3Service s3Service;
 
         @Transactional
         public CouponResDto createCoupon(Long userId, CouponCreateReqDto dto) {
@@ -35,7 +38,7 @@ public class CouponService {
                 Store store = storeRepository.findByUser(user)
                                 .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
 
-                validateImageUrl(dto.getImageUrl());
+                s3Service.validateFileUrl(userId, UploadDomain.COUPON, dto.getImageUrl());
 
                 Coupon coupon = Coupon.builder()
                                 .imageUrl(dto.getImageUrl())
@@ -56,13 +59,6 @@ public class CouponService {
                                 .discountType(savedCoupon.getDiscountType())
                                 .message("쿠폰이 등록되었습니다.")
                                 .build();
-        }
-
-        private void validateImageUrl(String imageUrl) {
-                if (imageUrl == null || imageUrl.isBlank()
-                                || (!imageUrl.startsWith("http://") && !imageUrl.startsWith("https://"))) {
-                        throw new CustomException(ErrorCode.INVALID_COUPON_IMAGE_URL);
-                }
         }
 
         public List<CouponListResDto> getMyCoupons(Long userId) {
@@ -90,7 +86,7 @@ public class CouponService {
                                 .orElseThrow(() -> new CustomException(ErrorCode.COUPON_NOT_FOUND));
 
                 validateCouponOwner(coupon, store);
-                validateImageUrl(dto.getImageUrl());
+                s3Service.validateFileUrl(userId, UploadDomain.COUPON, dto.getImageUrl());
 
                 coupon.updateCoupon(
                                 dto.getImageUrl(),
