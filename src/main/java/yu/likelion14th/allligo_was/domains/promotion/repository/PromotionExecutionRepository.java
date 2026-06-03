@@ -13,6 +13,7 @@ import yu.likelion14th.allligo_was.domains.promotion.entity.PromotionSchedule;
 public interface PromotionExecutionRepository extends JpaRepository<PromotionExecution, Long> {
     Optional<PromotionExecution> findFirstByPromotionScheduleOrderByExecutedAtDesc(PromotionSchedule schedule);
     Optional<PromotionExecution> findByTaskId(String taskId);
+    boolean existsByPromotionScheduleAndExecutedAt(PromotionSchedule schedule, LocalDateTime executedAt);
 
     void deleteAllByPromotionPromotionId(Long promotionId);
 

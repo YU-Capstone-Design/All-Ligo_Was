@@ -9,6 +9,7 @@ import java.util.Optional;
 public interface PromotionRepository extends JpaRepository<Promotion, Long> {
 
     List<Promotion> findAllByUserUserIdOrderByCreatedAtDesc(Long userId);
+    List<Promotion> findAllByDeadlineAfter(java.time.LocalDateTime now);
 
     Optional<Promotion> findByPromotionIdAndUserUserId(Long promotionId, Long userId);
 
