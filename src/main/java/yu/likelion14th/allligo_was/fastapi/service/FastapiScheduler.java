@@ -2,6 +2,7 @@ package yu.likelion14th.allligo_was.fastapi.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +40,9 @@ public class FastapiScheduler {
     private final PromotionTagRepository promotionTagRepository;
     private final StoreRepository storeRepository;
     private final PromotionImageRepository promotionImageRepository;
+
+    @Value("${app.backend.base-url:http://localhost:8080}")
+    private String baseUrl;
 
     // 매분 0초에 실행
     @Scheduled(cron = "0 * * * * *")
@@ -157,29 +161,26 @@ public class FastapiScheduler {
                 }
             }
 
-            // 2. Description (generatedText) 추출
+            // 2. 나레이션 문구(generatedText) 추출
             String generatedText = "";
             if (content.getCaption() != null && !content.getCaption().isBlank()) {
                 generatedText = content.getCaption();
             } else if (content.getBodyText() != null && !content.getBodyText().isBlank()) {
                 generatedText = content.getBodyText();
             }
-            String description = generatedText;
 
-            // 3. Title 추출
-            String title = "";
-            if (!generatedText.isBlank()) {
-                // 첫 번째 줄이나 문장을 추출
-                String firstSentence = generatedText.split("\n|\\\\.")[0].trim();
-                if (firstSentence.length() > 50) {
-                    title = firstSentence.substring(0, 50);
-                } else {
-                    title = firstSentence;
-                }
+            // 3. 유튜브 타이틀 조립 (나레이션 + 해시태그 문자열)
+            String hashtagString = tags.stream()
+                    .map(tag -> "#" + tag)
+                    .collect(Collectors.joining(" "));
+            
+            String rawTitle = generatedText;
+            if (!hashtagString.isBlank()) {
+                rawTitle = rawTitle.isBlank() ? hashtagString : rawTitle + " " + hashtagString;
             }
-
+            
             // 생성된 텍스트가 없거나 유효한 문장이 없을 경우 매장명 기반 고정 포맷 적용
-            if (title.isBlank()) {
+            if (rawTitle.isBlank()) {
                 String storeName = "매장";
                 if (promotion != null && promotion.getUser() != null) {
                     Store store = storeRepository.findByUser(promotion.getUser()).orElse(null);
@@ -187,12 +188,17 @@ public class FastapiScheduler {
                         storeName = store.getStoreName();
                     }
                 }
-                title = storeName + " 추천 쇼츠 영상";
-                // 최대 100자 보장
-                if (title.length() > 100) {
-                    title = title.substring(0, 100);
-                }
+                rawTitle = storeName + " 추천 쇼츠 영상";
             }
+            
+            // 유튜브 제목 최대 100자 제한 방어 코드
+            String title = rawTitle.length() > 100 ? rawTitle.substring(0, 97) + "..." : rawTitle;
+
+            // 4. 추적 링크 생성 및 설명란(Description) 조립
+            String trackLink = baseUrl + "/api/v1/contents/track/" + content.getContentId();
+            String description = generatedText + "\n\n"
+                    + "👇 이벤트 확인하기 👇\n"
+                    + trackLink;
 
             FastapiUploadReqDto uploadReq = FastapiUploadReqDto.builder()
                     .scheduleId(schedule != null ? String.valueOf(schedule.getScheduleId()) : "")
