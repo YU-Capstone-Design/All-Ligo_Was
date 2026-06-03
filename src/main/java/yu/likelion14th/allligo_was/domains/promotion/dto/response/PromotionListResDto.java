@@ -31,8 +31,8 @@ public class PromotionListResDto {
     @Schema(description = "홍보 요청 등록 시각", example = "2026-06-02T20:40:00")
     private LocalDateTime createdAt;
 
-    // BLOG, VIDEO
-    @Schema(description = "콘텐츠 타입", example = "BLOG")
+    // POST, VIDEO
+    @Schema(description = "콘텐츠 타입", example = "POST")
     private String contentType;
 
     public static PromotionListResDto fromEntity(

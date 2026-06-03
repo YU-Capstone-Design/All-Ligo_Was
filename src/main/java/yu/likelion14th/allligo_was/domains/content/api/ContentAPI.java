@@ -49,7 +49,7 @@ public interface ContentAPI {
                         생성 완료된 콘텐츠의 미리보기 정보를 조회합니다.
 
                         콘텐츠 상태가 GENERATED인 경우에만 조회할 수 있습니다.
-                        BLOG 또는 POST 타입은 본문과 이미지 정보를 포함하고,
+                        POST 타입은 본문과 이미지 정보를 포함하고,
                         VIDEO 타입은 캡션과 영상 URL 정보를 포함합니다.
                         """)
         @ApiResponses({

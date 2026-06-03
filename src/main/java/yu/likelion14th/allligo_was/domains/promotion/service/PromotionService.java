@@ -301,7 +301,7 @@ public class PromotionService {
             throw new CustomException(ErrorCode.INVALID_PROMOTION_TITLE);
         }
 
-        if (!"BLOG".equals(request.getContentType())
+        if (!"POST".equals(request.getContentType())
                 && !"VIDEO".equals(request.getContentType())) {
             throw new CustomException(ErrorCode.INVALID_PROMOTION_CONTENT_TYPE);
         }
@@ -355,7 +355,7 @@ public class PromotionService {
             throw new CustomException(ErrorCode.INVALID_PROMOTION_TITLE);
         }
 
-        if (!"BLOG".equals(request.getContentType())
+        if (!"POST".equals(request.getContentType())
                 && !"VIDEO".equals(request.getContentType())) {
             throw new CustomException(ErrorCode.INVALID_PROMOTION_CONTENT_TYPE);
         }

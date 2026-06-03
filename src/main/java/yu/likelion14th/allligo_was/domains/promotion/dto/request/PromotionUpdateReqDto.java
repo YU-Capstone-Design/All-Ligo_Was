@@ -22,8 +22,8 @@ public class PromotionUpdateReqDto {
     @Size(min = 3, max = 20, message = "홍보 제목은 3자 이상 20자 이하로 입력해주세요.")
     private String promotionTitle;
 
-    // BLOG, VIDEO
-    @Schema(description = "수정할 콘텐츠 타입입니다. BLOG 또는 VIDEO만 입력할 수 있습니다.", example = "BLOG")
+    // POST, VIDEO
+    @Schema(description = "수정할 콘텐츠 타입입니다. POST 또는 VIDEO만 입력할 수 있습니다.", example = "POST")
     @NotBlank(message = "콘텐츠 타입을 선택해주세요.")
     private String contentType;
 

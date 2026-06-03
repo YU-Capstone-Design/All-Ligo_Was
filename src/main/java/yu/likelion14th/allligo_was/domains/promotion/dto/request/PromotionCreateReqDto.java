@@ -17,8 +17,8 @@ import java.util.List;
 @Schema(description = "홍보 콘텐츠 생성 요청 DTO")
 public class PromotionCreateReqDto {
 
-    // BLOG, VIDEO
-    @Schema(description = "생성할 콘텐츠 타입입니다. BLOG 또는 VIDEO만 입력할 수 있습니다.", example = "VIDEO")
+    // POST, VIDEO
+    @Schema(description = "생성할 콘텐츠 타입입니다. POST 또는 VIDEO만 입력할 수 있습니다.", example = "VIDEO")
     @NotBlank(message = "콘텐츠 타입을 선택해주세요.")
     private String contentType;
 

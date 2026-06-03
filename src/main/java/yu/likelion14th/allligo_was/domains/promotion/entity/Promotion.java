@@ -31,7 +31,7 @@ public class Promotion {
     @Column(name = "promotion_id")
     private Long promotionId;
 
-    // BLOG, VIDEO로 유지
+    // POST, VIDEO로 유지
     @Column(name= "content_type", nullable = false)
     private String contentType;
 
