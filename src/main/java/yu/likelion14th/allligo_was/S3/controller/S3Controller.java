@@ -1,4 +1,4 @@
-package yu.likelion14th.allligo_was.S3.Controller;
+package yu.likelion14th.allligo_was.S3.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
