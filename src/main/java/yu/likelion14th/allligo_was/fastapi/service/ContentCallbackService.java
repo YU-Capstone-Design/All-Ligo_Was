@@ -11,6 +11,7 @@ import yu.likelion14th.allligo_was.domains.promotion.entity.PromotionSchedule;
 import yu.likelion14th.allligo_was.domains.promotion.repository.PromotionExecutionRepository;
 import yu.likelion14th.allligo_was.domains.promotion.repository.PromotionScheduleRepository;
 import yu.likelion14th.allligo_was.fastapi.dto.FastapiWebhookDto;
+import yu.likelion14th.allligo_was.domains.notification.service.NotificationService;
 
 import java.time.LocalDateTime;
 
@@ -22,6 +23,7 @@ public class ContentCallbackService {
     private final PromotionScheduleRepository scheduleRepository;
     private final PromotionExecutionRepository executionRepository;
     private final ContentRepository contentRepository;
+    private final NotificationService notificationService;
 
     @Transactional
     public void processWebhook(FastapiWebhookDto dto) {
@@ -86,7 +88,10 @@ public class ContentCallbackService {
             }
 
             content.setStatus("GENERATED");
-            contentRepository.save(content);
+
+            Content savedContent = contentRepository.save(content);
+            notificationService.createContentGeneratedNotification(savedContent);
+
             log.info("Successfully saved Content for Execution ID: {}", execution.getExecutionId());
         } else {
             log.warn("Webhook failed or data missing. TaskId: {}, Error: {}", dto.getTaskId(), dto.getError());
