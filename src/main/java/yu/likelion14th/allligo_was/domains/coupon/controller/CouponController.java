@@ -54,4 +54,19 @@ public class CouponController implements CouponAPI {
         Long userId = getCurrentUserId();
         return ResponseEntity.ok(couponService.deleteCoupon(userId, couponId));
     }
+
+    @Override
+    @GetMapping("/region")
+    public ResponseEntity<?> getCouponsByRegion(
+            @RequestParam("region") String region) {
+        return ResponseEntity.ok(couponService.getCouponsByRegion(region));
+    }
+
+    @Override
+    @GetMapping("/nearby")
+    public ResponseEntity<?> getNearbyCoupons(
+            @RequestParam("latitude") Double latitude,
+            @RequestParam("longitude") Double longitude) {
+        return ResponseEntity.ok(couponService.getNearbyCoupons(latitude, longitude));
+    }
 }
