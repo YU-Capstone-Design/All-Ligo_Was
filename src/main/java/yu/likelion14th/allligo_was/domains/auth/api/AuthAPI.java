@@ -162,7 +162,7 @@ public interface AuthAPI {
             "message": "회원가입이 완료되었습니다."
           }
           """))),
-      @ApiResponse(responseCode = "400", description = "잘못된 요청 / 비밀번호 오류 / 이메일 미인증 / 지역 정보 오류", content = @Content(mediaType = "application/json", examples = {
+      @ApiResponse(responseCode = "400", description = "잘못된 요청 / 비밀번호 오류 / 이메일 미인증 / 지역 정보 오류 / 가게 정보 오류", content = @Content(mediaType = "application/json", examples = {
           @ExampleObject(name = "비밀번호 길이 오류", value = """
               {
                 "status": 400,
@@ -192,7 +192,20 @@ public interface AuthAPI {
                 "status": 400,
                 "message": "지원하지 않는 지역 정보입니다."
               }
+              """),
+          @ExampleObject(name = "가게 정보 누락", value = """
+              {
+                "status": 400,
+                "message": "가게 정보는 필수 입력입니다."
+              }
+              """),
+          @ExampleObject(name = "가게 링크 형식 오류", value = """
+              {
+                "status": 400,
+                "message": "올바른 링크 형식으로 입력해 주세요."
+              }
               """)
+
       })),
       @ApiResponse(responseCode = "404", description = "이메일 인증 정보 없음", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
           {
