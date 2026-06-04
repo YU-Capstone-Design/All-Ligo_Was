@@ -162,9 +162,50 @@ public interface AuthAPI {
             "message": "회원가입이 완료되었습니다."
           }
           """))),
-      @ApiResponse(responseCode = "400", description = "잘못된 요청 / 비밀번호 오류 / 이메일 미인증"),
-      @ApiResponse(responseCode = "404", description = "이메일 인증 정보 없음"),
-      @ApiResponse(responseCode = "409", description = "이미 등록된 이메일")
+      @ApiResponse(responseCode = "400", description = "잘못된 요청 / 비밀번호 오류 / 이메일 미인증 / 지역 정보 오류", content = @Content(mediaType = "application/json", examples = {
+          @ExampleObject(name = "비밀번호 길이 오류", value = """
+              {
+                "status": 400,
+                "message": "6자 이상, 12자 이하로 입력해주세요."
+              }
+              """),
+          @ExampleObject(name = "비밀번호 불일치", value = """
+              {
+                "status": 400,
+                "message": "비밀번호가 일치하지 않습니다."
+              }
+              """),
+          @ExampleObject(name = "이메일 미인증", value = """
+              {
+                "status": 400,
+                "message": "이메일 인증이 완료되지 않았습니다."
+              }
+              """),
+          @ExampleObject(name = "지역 정보 누락", value = """
+              {
+                "status": 400,
+                "message": "지역 정보는 필수 입력입니다."
+              }
+              """),
+          @ExampleObject(name = "지원하지 않는 지역 정보", value = """
+              {
+                "status": 400,
+                "message": "지원하지 않는 지역 정보입니다."
+              }
+              """)
+      })),
+      @ApiResponse(responseCode = "404", description = "이메일 인증 정보 없음", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+          {
+            "status": 404,
+            "message": "해당 이메일 인증 정보를 찾을 수 없습니다."
+          }
+          """))),
+      @ApiResponse(responseCode = "409", description = "이미 등록된 이메일", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+          {
+            "status": 409,
+            "message": "이미 등록된 메일은 사용할 수 없어요."
+          }
+          """)))
   })
   ResponseEntity<?> signup(
       @Valid @RequestBody SignUpReqDto dto);
