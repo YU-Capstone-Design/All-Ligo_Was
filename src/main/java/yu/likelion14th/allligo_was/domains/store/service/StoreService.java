@@ -3,6 +3,7 @@ package yu.likelion14th.allligo_was.domains.store.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import yu.likelion14th.allligo_was.domains.coupon.repository.CouponRepository;
 import yu.likelion14th.allligo_was.domains.store.dto.response.StoreResponseDto;
 import yu.likelion14th.allligo_was.domains.store.entity.Store;
 import yu.likelion14th.allligo_was.domains.store.repository.StoreRepository;
@@ -18,6 +19,7 @@ import java.util.Set;
 public class StoreService {
 
     private final StoreRepository storeRepository;
+    private final CouponRepository couponRepository;
 
     private static final Set<String> ALLOWED_REGIONS = new HashSet<>(Arrays.asList(
             "서울", "인천", "경기", "강원", "대전", "세종", "충남", "충북",
@@ -28,14 +30,20 @@ public class StoreService {
         validateRegion(region);
         return storeRepository.findAllByRegionHavingCoupons(region)
                 .stream()
-                .map(StoreResponseDto::fromEntity)
+                .map(store -> {
+                    Long couponCount = couponRepository.countByStore(store);
+                    return StoreResponseDto.fromEntity(store, couponCount);
+                })
                 .toList();
     }
 
     public List<StoreResponseDto> getNearbyStoresWithCoupons(Double latitude, Double longitude) {
         return storeRepository.findNearbyStoresHavingCoupons(latitude, longitude)
                 .stream()
-                .map(StoreResponseDto::fromEntity)
+                .map(store -> {
+                    Long couponCount = couponRepository.countByStore(store);
+                    return StoreResponseDto.fromEntity(store, couponCount);
+                })
                 .toList();
     }
 
