@@ -18,6 +18,7 @@ public enum ErrorCode {
     PASSWORD_NOT_MATCH(HttpStatus.BAD_REQUEST, "비밀번호가 일치하지 않습니다."),
     STORE_REQUIRED(HttpStatus.BAD_REQUEST, "가게 정보는 필수 입력입니다."),
     INVALID_STORE_URL(HttpStatus.BAD_REQUEST, "올바른 링크 형식으로 입력해 주세요."),
+    INVALID_REGION(HttpStatus.BAD_REQUEST, "지원하지 않는 지역 정보입니다."),
 
     LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "이메일 또는 비밀번호가 일치하지 않습니다."),
 
