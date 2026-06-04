@@ -30,6 +30,7 @@ import yu.likelion14th.allligo_was.security.JwtUtil;
 import yu.likelion14th.allligo_was.domains.auth.dto.response.LogoutResDto;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -154,6 +155,7 @@ public class AuthService {
 
         validatePassword(dto.getPassword(), dto.getPasswordConfirm());
         validateStoreInfo(dto);
+        validateRegion(dto.getRegion());
 
         User user = User.builder()
                 .email(dto.getEmail())
@@ -169,6 +171,7 @@ public class AuthService {
                 .latitude(dto.getLatitude())
                 .longitude(dto.getLongitude())
                 .mapUrl(dto.getMapUrl())
+                .region(dto.getRegion())
                 .profileImageUrl(getDefaultProfileImageUrl())
                 .createdAt(LocalDateTime.now())
                 .user(savedUser)
@@ -280,6 +283,20 @@ public class AuthService {
 
         if (!dto.getMapUrl().startsWith("http://") && !dto.getMapUrl().startsWith("https://")) {
             throw new CustomException(ErrorCode.INVALID_STORE_URL);
+        }
+    }
+
+    private void validateRegion(String region) {
+        if (region == null || region.isBlank()) {
+            throw new CustomException(ErrorCode.INVALID_REGION);
+        }
+
+        if (!List.of(
+                "서울", "인천", "경기", "강원",
+                "대전", "세종", "충남", "충북",
+                "대구", "경북", "부산", "울산", "경남",
+                "광주", "전남", "전북", "제주").contains(region)) {
+            throw new CustomException(ErrorCode.INVALID_REGION);
         }
     }
 }
