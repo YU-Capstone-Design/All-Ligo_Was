@@ -20,7 +20,8 @@ public class CorsConfig {
 
         configuration.setAllowedOrigins(List.of(
                 "http://localhost:5173",
-                "http://43.201.46.138"
+                "http://43.201.46.138",
+                "https://allligo.cloud"
         ));
 
         configuration.setAllowedMethods(List.of(
