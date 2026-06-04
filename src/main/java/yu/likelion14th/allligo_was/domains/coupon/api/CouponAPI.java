@@ -202,7 +202,8 @@ public interface CouponAPI {
               "latitude": 35.8711,
               "longitude": 128.6014,
               "mapUrl": "https://map.naver.com/...",
-              "profileImageUrl": "https://..."
+              "profileImageUrl": "https://...",
+              "couponCount": 3
             }
           ]
           """))),
@@ -229,7 +230,8 @@ public interface CouponAPI {
               "latitude": 35.8711,
               "longitude": 128.6014,
               "mapUrl": "https://map.naver.com/...",
-              "profileImageUrl": "https://..."
+              "profileImageUrl": "https://...",
+              "couponCount": 3
             }
           ]
           """)))
