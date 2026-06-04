@@ -16,8 +16,9 @@ public class StoreResponseDto {
     private Double longitude;
     private String mapUrl;
     private String profileImageUrl;
+    private Long couponCount;
 
-    public static StoreResponseDto fromEntity(Store store) {
+    public static StoreResponseDto fromEntity(Store store, Long couponCount) {
         return StoreResponseDto.builder()
                 .storeId(store.getStoreId())
                 .storeName(store.getStoreName())
@@ -26,6 +27,7 @@ public class StoreResponseDto {
                 .longitude(store.getLongitude())
                 .mapUrl(store.getMapUrl())
                 .profileImageUrl(store.getProfileImageUrl())
+                .couponCount(couponCount)
                 .build();
     }
 }
