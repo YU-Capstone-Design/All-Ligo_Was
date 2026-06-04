@@ -12,6 +12,8 @@ public interface CouponRepository extends JpaRepository<Coupon, Long> {
 
     List<Coupon> findAllByStore(Store store);
 
+    Long countByStore(Store store);
+
     @Query("select c from Coupon c join fetch c.store where c.store in :stores")
     List<Coupon> findAllByStoreIn(@Param("stores") List<Store> stores);
 }
