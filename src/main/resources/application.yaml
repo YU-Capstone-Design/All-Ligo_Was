@@ -43,7 +43,8 @@ app:
     verify-url: ${BACKEND_VERIFY_URL}
     base-url: ${BACKEND_URL:http://localhost:8080}
   frontend:
-    verify-complete-url: ${FRONTEND_VERIFY_COMPLETE_URL}
+    verify-success-url: ${FRONTEND_VERIFY_SUCCESS_URL}
+    verify-fail-url: ${FRONTEND_VERIFY_FAIL_URL}
 
 server:
   port: ${SERVER_PORT:8080}

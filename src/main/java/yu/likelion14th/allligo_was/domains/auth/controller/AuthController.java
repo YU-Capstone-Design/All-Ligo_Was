@@ -12,8 +12,10 @@ import jakarta.validation.Valid;
 import yu.likelion14th.allligo_was.domains.auth.api.AuthAPI;
 import yu.likelion14th.allligo_was.domains.auth.dto.request.EmailAddressReqDto;
 import yu.likelion14th.allligo_was.domains.auth.service.AuthService;
+import yu.likelion14th.allligo_was.exception.CustomException;
 import yu.likelion14th.allligo_was.domains.auth.dto.request.SignUpReqDto;
 import yu.likelion14th.allligo_was.domains.auth.dto.request.LoginReqDto;
+import yu.likelion14th.allligo_was.exception.CustomException;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -32,18 +34,28 @@ public class AuthController implements AuthAPI {
         return ResponseEntity.ok(authService.sendVerificationEmail(dto));
     }
 
-    @Value("${app.frontend.verify-complete-url}")
-    private String frontendVerifyCompleteUrl;
+    @Value("${app.frontend.verify-success-url}")
+    private String frontendVerifySuccessUrl;
+
+    @Value("${app.frontend.verify-fail-url}")
+    private String frontendVerifyFailUrl;
 
     @GetMapping("/email/verify")
     public ResponseEntity<Void> verifyEmail(
             @RequestParam("email") String email,
             @RequestParam("token") String token) {
-        authService.verifyEmail(email, token);
+        try {
+            authService.verifyEmail(email, token);
 
-        return ResponseEntity.status(HttpStatus.FOUND)
-                .location(URI.create(frontendVerifyCompleteUrl))
-                .build();
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .location(URI.create(frontendVerifySuccessUrl))
+                    .build();
+
+        } catch (CustomException e) {
+            return ResponseEntity.status(HttpStatus.FOUND)
+                    .location(URI.create(frontendVerifyFailUrl))
+                    .build();
+        }
     }
 
     @Override

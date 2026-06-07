@@ -72,9 +72,9 @@ public interface AuthAPI {
   ResponseEntity<?> sendVerificationEmail(
       @Valid @RequestBody EmailAddressReqDto dto);
 
-  @Operation(summary = "이메일 인증 완료", description = "이메일의 인증하기 버튼을 클릭하면 호출되는 API입니다. email과 token을 검증하여 이메일 인증 완료 상태를 저장하고, 인증 성공 시 프론트엔드의 인증 완료 안내 화면으로 리다이렉트합니다. 회원가입 화면의 완료 버튼 판별은 별도의 이메일 인증 상태 확인 API를 사용합니다.")
+  @Operation(summary = "이메일 인증 완료", description = "이메일의 인증하기 버튼을 클릭하면 호출되는 API입니다. email과 token을 검증하여 이메일 인증 완료 상태를 저장하고, 인증 성공 시 프론트엔드의 인증 완료 안내 화면으로 리다이렉트합니다. 인증 실패 시 프론트엔드 인증 실패 화면으로 리다이렉트합니다. 성공 화면: https://allligo.cloud/auth-success , 실패 화면: https://allligo.cloud/auth-fail 회원가입 화면의 완료 버튼 판별은 별도의 이메일 인증 상태 확인 API를 사용합니다.")
   @ApiResponses({
-      @ApiResponse(responseCode = "302", description = "이메일 인증 완료 후 프론트 인증 완료 안내 화면으로 리다이렉트"),
+      @ApiResponse(responseCode = "302", description = "이메일 인증 완료 후 이메일 인증 결과에 따라 성공 또는 실패 화면으로 리다이렉트"),
       @ApiResponse(responseCode = "400", description = "이메일 형식 오류 / 토큰 오류 / 인증 시간 만료", content = @Content(mediaType = "application/json", examples = {
           @ExampleObject(name = "토큰 오류", value = """
               {
