@@ -12,6 +12,7 @@ import yu.likelion14th.allligo_was.domains.promotion.dto.request.PromotionUpdate
 import yu.likelion14th.allligo_was.domains.promotion.dto.response.PromotionDetailResDto;
 import yu.likelion14th.allligo_was.domains.promotion.dto.response.PromotionListResDto;
 import yu.likelion14th.allligo_was.domains.promotion.entity.Promotion;
+import yu.likelion14th.allligo_was.domains.promotion.entity.PromotionExecution;
 import yu.likelion14th.allligo_was.domains.promotion.entity.PromotionImage;
 import yu.likelion14th.allligo_was.domains.promotion.entity.PromotionSchedule;
 import yu.likelion14th.allligo_was.domains.promotion.entity.PromotionTag;
@@ -84,6 +85,17 @@ public class PromotionService {
         List<PromotionImage> savedImages = saveImages(savedPromotion, request.getImageUrls());
         List<PromotionTag> savedTags = saveTags(savedPromotion, request.getTags());
         List<PromotionSchedule> savedSchedules = saveSchedules(savedPromotion, request.getSchedules());
+
+        // 분 단위 정렬을 고려하여 다음 스케줄러 수집 주기(정각 초 단위)에 완벽히 매칭되도록 executedAt을 계산합니다.
+        // 현재 초가 0초가 아니므로, 버림 처리 후 (5분 + 1분) = 6분 뒤로 지정하여 다음 분 정각 실행 시 수집 범위에 들게 합니다.
+        LocalDateTime alignedExecuteTime = now.withSecond(0).withNano(0).plusMinutes(6);
+        PromotionExecution immediateExecution = PromotionExecution.builder()
+                .promotion(savedPromotion)
+                .promotionSchedule(null) // 1회성이므로 스케줄 null
+                .executedAt(alignedExecuteTime)
+                .status("PENDING")
+                .build();
+        promotionExecutionRepository.save(immediateExecution);
 
         return PromotionDetailResDto.fromEntity(
                 savedPromotion,
@@ -426,11 +438,12 @@ public class PromotionService {
 
     /**
      * 스케줄 목록을 검증합니다.
+     * 시연용으로 1시간 이후가 아닌 현재 시간 기준으로 이후에 생성 가능하도록 변경합니다.
      *
      * @param schedules 스케줄 목록
      */
     private void validateSchedules(List<PromotionScheduleReqDto> schedules) {
-        LocalDateTime minimumPublishTime = LocalDateTime.now().plusHours(1);
+        LocalDateTime minimumPublishTime = LocalDateTime.now();
         Set<String> scheduleKeys = new HashSet<>();
 
         for (PromotionScheduleReqDto schedule : schedules) {
