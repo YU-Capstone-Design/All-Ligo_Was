@@ -86,12 +86,13 @@ public class PromotionService {
         List<PromotionTag> savedTags = saveTags(savedPromotion, request.getTags());
         List<PromotionSchedule> savedSchedules = saveSchedules(savedPromotion, request.getSchedules());
 
-        // 최초 홍보 등록 시 즉시 업로드를 위한 1회성 PENDING 실행(PromotionExecution) 추가 등록
-        // 테스트 환경 설정에 맞춰 현재 시간 + 5분 뒤 실행되도록 설정하여 스케줄러가 즉시 비디오 제작을 트리거하고 5분 뒤 자동 업로드합니다.
+        // 분 단위 정렬을 고려하여 다음 스케줄러 수집 주기(정각 초 단위)에 완벽히 매칭되도록 executedAt을 계산합니다.
+        // 현재 초가 0초가 아니므로, 버림 처리 후 (5분 + 1분) = 6분 뒤로 지정하여 다음 분 정각 실행 시 수집 범위에 들게 합니다.
+        LocalDateTime alignedExecuteTime = now.withSecond(0).withNano(0).plusMinutes(6);
         PromotionExecution immediateExecution = PromotionExecution.builder()
                 .promotion(savedPromotion)
                 .promotionSchedule(null) // 1회성이므로 스케줄 null
-                .executedAt(now.plusMinutes(5))
+                .executedAt(alignedExecuteTime)
                 .status("PENDING")
                 .build();
         promotionExecutionRepository.save(immediateExecution);
