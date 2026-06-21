@@ -437,11 +437,12 @@ public class PromotionService {
 
     /**
      * 스케줄 목록을 검증합니다.
+     * 시연용으로 1시간 이후가 아닌 현재 시간 기준으로 이후에 생성 가능하도록 변경합니다.
      *
      * @param schedules 스케줄 목록
      */
     private void validateSchedules(List<PromotionScheduleReqDto> schedules) {
-        LocalDateTime minimumPublishTime = LocalDateTime.now().plusHours(1);
+        LocalDateTime minimumPublishTime = LocalDateTime.now();
         Set<String> scheduleKeys = new HashSet<>();
 
         for (PromotionScheduleReqDto schedule : schedules) {
