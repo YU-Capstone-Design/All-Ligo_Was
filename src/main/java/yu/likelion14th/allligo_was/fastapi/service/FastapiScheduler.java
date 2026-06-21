@@ -82,6 +82,8 @@ public class FastapiScheduler {
             reqDto.setMoodTag("밝은, 쾌활한");
             reqDto.setHashTag("#마케팅 #이벤트");
             reqDto.setPrompt(promotion != null ? promotion.getPrompt() : "");
+            // 항상 TRANSFORM으로 설정하여 업로드된 이미지를 LLaVA로 분석하고, 이를 바탕으로 SDXL로 AI 이미지를 새로 생성하게 합니다.
+            reqDto.setMode("TRANSFORM");
             
             if (schedule != null) {
                 reqDto.setUploadDay(schedule.getDayOfWeek());
@@ -103,12 +105,19 @@ public class FastapiScheduler {
                     reqDto.setContentType(dbContentType.toUpperCase().trim());
                 }
 
-                // 3. mode Null 방어 및 기본값 매핑
-                String dbMode = promotion.getMode();
-                if (dbMode == null || dbMode.isBlank()) {
-                    reqDto.setMode("TRANSFORM");
-                } else {
-                    reqDto.setMode(dbMode.toUpperCase().trim());
+                // 3. 분위기 태그 매핑 (DB의 mode 컬럼 값을 moodTag에 매핑)
+                String dbMode = promotion.getMode(); // DB의 mode 컬럼은 '밝음', '따뜻함', '차분함' 등의 분위기 정보를 담고 있습니다.
+                if (dbMode != null && !dbMode.isBlank()) {
+                    reqDto.setMoodTag(dbMode);
+                }
+
+                // 4. 해시태그 추출 및 매핑
+                List<PromotionTag> promotionTags = promotionTagRepository.findAllByPromotion(promotion);
+                if (promotionTags != null && !promotionTags.isEmpty()) {
+                    String hashTagStr = promotionTags.stream()
+                            .map(t -> t.getTagName().startsWith("#") ? t.getTagName() : "#" + t.getTagName())
+                            .collect(Collectors.joining(" "));
+                    reqDto.setHashTag(hashTagStr);
                 }
 
                 // --- Top 3 과거 우수 성과 콘텐츠 조회 및 매핑 ---
