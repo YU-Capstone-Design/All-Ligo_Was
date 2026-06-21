@@ -12,6 +12,7 @@ import yu.likelion14th.allligo_was.domains.promotion.dto.request.PromotionUpdate
 import yu.likelion14th.allligo_was.domains.promotion.dto.response.PromotionDetailResDto;
 import yu.likelion14th.allligo_was.domains.promotion.dto.response.PromotionListResDto;
 import yu.likelion14th.allligo_was.domains.promotion.entity.Promotion;
+import yu.likelion14th.allligo_was.domains.promotion.entity.PromotionExecution;
 import yu.likelion14th.allligo_was.domains.promotion.entity.PromotionImage;
 import yu.likelion14th.allligo_was.domains.promotion.entity.PromotionSchedule;
 import yu.likelion14th.allligo_was.domains.promotion.entity.PromotionTag;
@@ -84,6 +85,16 @@ public class PromotionService {
         List<PromotionImage> savedImages = saveImages(savedPromotion, request.getImageUrls());
         List<PromotionTag> savedTags = saveTags(savedPromotion, request.getTags());
         List<PromotionSchedule> savedSchedules = saveSchedules(savedPromotion, request.getSchedules());
+
+        // 최초 홍보 등록 시 즉시 업로드를 위한 1회성 PENDING 실행(PromotionExecution) 추가 등록
+        // 테스트 환경 설정에 맞춰 현재 시간 + 5분 뒤 실행되도록 설정하여 스케줄러가 즉시 비디오 제작을 트리거하고 5분 뒤 자동 업로드합니다.
+        PromotionExecution immediateExecution = PromotionExecution.builder()
+                .promotion(savedPromotion)
+                .promotionSchedule(null) // 1회성이므로 스케줄 null
+                .executedAt(now.plusMinutes(5))
+                .status("PENDING")
+                .build();
+        promotionExecutionRepository.save(immediateExecution);
 
         return PromotionDetailResDto.fromEntity(
                 savedPromotion,
