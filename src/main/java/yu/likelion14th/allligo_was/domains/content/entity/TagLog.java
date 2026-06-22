@@ -40,6 +40,6 @@ public class TagLog {
     private Long userId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "tag_id", nullable = false)
+    @JoinColumn(name = "tag_id")
     private PromotionTag promotionTag;
 }
