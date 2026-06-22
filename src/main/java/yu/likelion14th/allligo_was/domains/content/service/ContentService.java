@@ -57,6 +57,7 @@ public class ContentService {
         clickLogRepository.save(ClickLog.builder()
                 .content(content)
                 .clickSource(content.getContentType())
+                .userId(owner.getUserId())
                 .clickedAt(LocalDateTime.now())
                 .build());
 

@@ -32,8 +32,11 @@ public class ClickLog {
     @Column(name="click_source", nullable = false)
     private String clickSource;
 
+    @Column(name = "user_id")
+    private Long userId;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="content_id", nullable = false)
+    @JoinColumn(name="content_id")
     private Content content;
 
 }
