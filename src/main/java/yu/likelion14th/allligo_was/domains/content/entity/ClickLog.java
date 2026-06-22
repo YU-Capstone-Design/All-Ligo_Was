@@ -32,7 +32,7 @@ public class ClickLog {
     @Column(name="click_source", nullable = false)
     private String clickSource;
 
-    @Column(name = "user_id")
+    @Column(name = "user_id", nullable = false)
     private Long userId;
 
     @ManyToOne(fetch = FetchType.LAZY)
