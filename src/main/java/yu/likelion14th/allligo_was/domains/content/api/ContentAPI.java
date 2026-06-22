@@ -58,6 +58,7 @@ public interface ContentAPI {
                                 {
                                   "contentId": 1,
                                   "executionId": 1,
+                                  "executedAt": "2026-06-03T06:00:00"
                                   "promotionId": 3,
                                   "storeName": "돼지상회",
                                   "promotionTitle": "오늘의 따뜻한 커피 이벤트",
@@ -72,7 +73,6 @@ public interface ContentAPI {
                                   "uploadVideoUrl": null,
                                   "createdAt": "2026-06-02T17:50:00",
                                   "expiresAt": "2026-06-03T17:50:00",
-                                  "uploadedAt": null
                                 }
                                 """))),
                         @ApiResponse(responseCode = "400", description = "생성 완료 상태가 아닌 콘텐츠를 조회한 경우", content = @Content(mediaType = "application/json", examples = @ExampleObject(name = "미리보기 불가 상태", value = """

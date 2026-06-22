@@ -61,8 +61,8 @@ public class ContentPreviewResDto {
     @Schema(description = "콘텐츠 만료 시간", example = "2026-06-03T17:50:00")
     private LocalDateTime expiresAt;
 
-    @Schema(description = "플랫폼 업로드 완료 시간. 업로드 전이면 null입니다.", example = "2026-06-02T18:00:00")
-    private LocalDateTime uploadedAt;
+    @Schema(description = "콘텐츠 실행 일시", example = "2026-06-23T18:30:00")
+    private LocalDateTime executedAt;
 
     public static ContentPreviewResDto fromEntity(Content content, String storeName) {
         Promotion promotion = content.getPromotionExecution().getPromotion();
@@ -70,6 +70,7 @@ public class ContentPreviewResDto {
         return ContentPreviewResDto.builder()
                 .contentId(content.getContentId())
                 .executionId(content.getPromotionExecution().getExecutionId())
+                .executedAt(content.getPromotionExecution().getExecutedAt())
                 .promotionId(promotion.getPromotionId())
                 .storeName(storeName)
                 .promotionTitle(promotion.getPromotionTitle())
@@ -84,7 +85,6 @@ public class ContentPreviewResDto {
                 .uploadVideoUrl(content.getUploadVideoUrl())
                 .createdAt(content.getCreatedAt())
                 .expiresAt(content.getExpiresAt())
-                .uploadedAt(content.getUploadedAt())
                 .build();
     }
 
