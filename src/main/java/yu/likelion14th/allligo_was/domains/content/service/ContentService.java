@@ -69,6 +69,8 @@ public class ContentService {
             tagLogRepository.save(TagLog.builder()
                     .clickedAt(LocalDateTime.now())
                     .promotionTag(tag)
+                    .tagName(tag.getTagName().trim())
+                    .userId(owner.getUserId())
                     .build());
         }
 

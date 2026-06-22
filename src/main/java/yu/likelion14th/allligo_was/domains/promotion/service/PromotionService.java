@@ -26,6 +26,12 @@ import yu.likelion14th.allligo_was.domains.user.repository.UserRepository;
 import yu.likelion14th.allligo_was.exception.CustomException;
 import yu.likelion14th.allligo_was.exception.ErrorCode;
 
+import yu.likelion14th.allligo_was.domains.content.repository.TagLogRepository;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -51,6 +57,7 @@ public class PromotionService {
     private final ContentRepository contentRepository;
     private final UserRepository userRepository;
     private final S3Service s3Service;
+    private final TagLogRepository tagLogRepository;
 
     /**
      * 홍보 콘텐츠 생성 요청 및 스케줄을 등록합니다.
@@ -185,14 +192,13 @@ public class PromotionService {
         );
 
         promotionImageRepository.deleteAllByPromotionPromotionId(promotionId);
-        promotionTagRepository.deleteAllByPromotionPromotionId(promotionId);
         
         promotionExecutionRepository.deletePendingExecutionsByPromotionId(promotionId);
         promotionExecutionRepository.nullifyScheduleIdByPromotionId(promotionId);
         promotionScheduleRepository.deleteAllByPromotionPromotionId(promotionId);
 
         List<PromotionImage> savedImages = saveImages(promotion, request.getImageUrls());
-        List<PromotionTag> savedTags = saveTags(promotion, request.getTags());
+        List<PromotionTag> savedTags = updateTagsByDiff(promotion, request.getTags());
         List<PromotionSchedule> savedSchedules = saveSchedules(promotion, request.getSchedules());
 
         return PromotionDetailResDto.fromEntity(
@@ -219,6 +225,9 @@ public class PromotionService {
      */
     public void deletePromotion(Long userId, Long promotionId) {
         Promotion promotion = getPromotionByUser(userId, promotionId);
+
+        List<PromotionTag> tags = promotionTagRepository.findAllByPromotionPromotionId(promotionId);
+        nullifyTagLogs(tags);
 
         contentRepository.deleteAllByPromotionExecutionPromotionPromotionId(promotionId);
         promotionExecutionRepository.deleteAllByPromotionPromotionId(promotionId);
@@ -275,7 +284,7 @@ public class PromotionService {
 
         List<PromotionTag> promotionTags = tags.stream()
                 .map(tag -> PromotionTag.builder()
-                        .tagName(tag)
+                        .tagName(tag.trim())
                         .tagType("USER")
                         .promotion(promotion)
                         .build())
@@ -472,5 +481,64 @@ public class PromotionService {
             }
         }
 
+    }
+
+    private List<PromotionTag> updateTagsByDiff(Promotion promotion, List<String> requestTags) {
+        List<PromotionTag> existingTags =
+                promotionTagRepository.findAllByPromotionPromotionId(promotion.getPromotionId());
+
+        Set<String> requestTagNames = new HashSet<>();
+
+        if (requestTags != null) {
+            for (String tag : requestTags) {
+                requestTagNames.add(tag.trim());
+            }
+        }
+
+        Map<String, PromotionTag> existingTagMap = existingTags.stream()
+                .collect(Collectors.toMap(
+                        tag -> tag.getTagName().trim(),
+                        Function.identity(),
+                        (first, second) -> first
+                ));
+
+        List<PromotionTag> tagsToDelete = existingTags.stream()
+                .filter(existingTag -> !requestTagNames.contains(existingTag.getTagName().trim()))
+                .toList();
+
+        nullifyTagLogs(tagsToDelete);
+
+        if (!tagsToDelete.isEmpty()) {
+            promotionTagRepository.deleteAll(tagsToDelete);
+        }
+
+        List<PromotionTag> tagsToAdd = requestTagNames.stream()
+                .filter(tagName -> !existingTagMap.containsKey(tagName))
+                .map(tagName -> PromotionTag.builder()
+                        .tagName(tagName)
+                        .tagType("USER")
+                        .promotion(promotion)
+                        .build())
+                .toList();
+
+        if (!tagsToAdd.isEmpty()) {
+            promotionTagRepository.saveAll(tagsToAdd);
+        }
+
+        return promotionTagRepository.findAllByPromotionPromotionId(promotion.getPromotionId());
+    }
+
+    private void nullifyTagLogs(List<PromotionTag> tags) {
+        if (tags == null || tags.isEmpty()) {
+            return;
+        }
+
+        List<Long> tagIds = tags.stream()
+                .map(PromotionTag::getTagId)
+                .toList();
+
+        if (!tagIds.isEmpty()) {
+            tagLogRepository.nullifyPromotionTagByTagIds(tagIds);
+        }
     }
 }
