@@ -9,6 +9,8 @@ import yu.likelion14th.allligo_was.domains.content.entity.Content;
 import yu.likelion14th.allligo_was.domains.content.repository.ContentRepository;
 import yu.likelion14th.allligo_was.exception.CustomException;
 import yu.likelion14th.allligo_was.exception.ErrorCode;
+import yu.likelion14th.allligo_was.domains.store.entity.Store;
+import yu.likelion14th.allligo_was.domains.store.repository.StoreRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +21,7 @@ public class ContentManageService {
     private static final String STATUS_CANCELLED = "CANCELLED";
 
     private final ContentRepository contentRepository;
+    private final StoreRepository storeRepository;
 
     /**
      * 생성 완료된 콘텐츠의 미리보기 정보를 조회합니다.
@@ -38,7 +41,10 @@ public class ContentManageService {
 
         validatePreviewAvailable(content);
 
-        return ContentPreviewResDto.fromEntity(content);
+        Store store = storeRepository.findFirstByUserUserIdOrderByStoreIdAsc(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
+
+        return ContentPreviewResDto.fromEntity(content, store.getStoreName());
     }
 
     /**

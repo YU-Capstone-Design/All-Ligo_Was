@@ -22,4 +22,7 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
                    "ORDER BY ST_Distance_Sphere(POINT(s.longitude, s.latitude), POINT(?2, ?1)) ASC",
            nativeQuery = true)
     List<Store> findNearbyStoresHavingCoupons(@Param("latitude") Double latitude, @Param("longitude") Double longitude);
+
+    //사용자가 등록한 가게들 중 storeId가 가장 작은 가게 조회
+    Optional<Store> findFirstByUserUserIdOrderByStoreIdAsc(Long userId);
 }

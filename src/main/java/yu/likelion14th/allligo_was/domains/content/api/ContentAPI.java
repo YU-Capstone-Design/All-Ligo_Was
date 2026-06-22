@@ -53,19 +53,49 @@ public interface ContentAPI {
                         VIDEO 타입은 캡션과 영상 URL 정보를 포함합니다.
                         """)
         @ApiResponses({
-                        @ApiResponse(responseCode = "200", description = "생성 완료 콘텐츠 미리보기 조회 성공"),
+                        @ApiResponse(responseCode = "200", description = "생성 완료 콘텐츠 미리보기 조회 성공",
+                                content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                                {
+                                  "contentId": 1,
+                                  "executionId": 1,
+                                  "promotionId": 3,
+                                  "storeName": "돼지상회",
+                                  "promotionTitle": "오늘의 따뜻한 커피 이벤트",
+                                  "contentType": "VIDEO",
+                                  "contentTypeLabel": "영상",
+                                  "status": "GENERATED",
+                                  "posterUrl": "https://all-ligo-bucket.s3.ap-northeast-2.amazonaws.com/poster/example.png",
+                                  "bodyText": null,
+                                  "caption": "비 오는 날엔 따뜻한 라떼 한 잔 어떠세요?",
+                                  "s3VideoUrl": "https://all-ligo-bucket.s3.ap-northeast-2.amazonaws.com/videos/example.mp4",
+                                  "localVideoPath": "/tmp/all-ligo/videos/example.mp4",
+                                  "uploadVideoUrl": null,
+                                  "createdAt": "2026-06-02T17:50:00",
+                                  "expiresAt": "2026-06-03T17:50:00",
+                                  "uploadedAt": null
+                                }
+                                """))),
                         @ApiResponse(responseCode = "400", description = "생성 완료 상태가 아닌 콘텐츠를 조회한 경우", content = @Content(mediaType = "application/json", examples = @ExampleObject(name = "미리보기 불가 상태", value = """
                                         {
                                           "status": 400,
                                           "message": "생성 완료된 콘텐츠만 미리보기할 수 있습니다."
                                         }
                                         """))),
-                        @ApiResponse(responseCode = "404", description = "콘텐츠를 찾을 수 없음", content = @Content(mediaType = "application/json", examples = @ExampleObject(value = """
+                        @ApiResponse(responseCode = "404", description = "콘텐츠 또는 매장 정보를 찾을 수 없음",
+                                content = @Content(mediaType = "application/json", examples = {
+                                        @ExampleObject(name = "콘텐츠 없음", value = """
                                         {
                                           "status": 404,
                                           "message": "콘텐츠를 찾을 수 없습니다."
                                         }
-                                        """)))
+                                        """),
+                                        @ExampleObject(name = "매장 정보 없음", value = """
+                                        {
+                                          "status": 404,
+                                          "message": "매장 정보를 찾을 수 없습니다."
+                                        }
+                                        """)
+                                }))
         })
         ResponseEntity<ContentPreviewResDto> getContentPreview(
                         @Parameter(description = "미리보기할 콘텐츠 ID", example = "1") @PathVariable("contentId") Long contentId);

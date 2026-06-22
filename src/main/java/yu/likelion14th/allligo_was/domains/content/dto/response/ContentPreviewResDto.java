@@ -22,6 +22,9 @@ public class ContentPreviewResDto {
     @Schema(description = "홍보 요청 ID", example = "3")
     private Long promotionId;
 
+    @Schema(description = "상호명", example = "돼지상회")
+    private String storeName;
+
     @Schema(description = "게시글 제목", example = "오늘의 따뜻한 커피 이벤트")
     private String promotionTitle;
 
@@ -61,13 +64,14 @@ public class ContentPreviewResDto {
     @Schema(description = "플랫폼 업로드 완료 시간. 업로드 전이면 null입니다.", example = "2026-06-02T18:00:00")
     private LocalDateTime uploadedAt;
 
-    public static ContentPreviewResDto fromEntity(Content content) {
+    public static ContentPreviewResDto fromEntity(Content content, String storeName) {
         Promotion promotion = content.getPromotionExecution().getPromotion();
 
         return ContentPreviewResDto.builder()
                 .contentId(content.getContentId())
                 .executionId(content.getPromotionExecution().getExecutionId())
                 .promotionId(promotion.getPromotionId())
+                .storeName(storeName)
                 .promotionTitle(promotion.getPromotionTitle())
                 .contentType(content.getContentType())
                 .contentTypeLabel(toContentTypeLabel(content.getContentType()))
