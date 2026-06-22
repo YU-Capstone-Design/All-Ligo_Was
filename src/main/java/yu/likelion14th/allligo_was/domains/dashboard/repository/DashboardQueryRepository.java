@@ -72,14 +72,13 @@ public class DashboardQueryRepository {
 
     public List<Object[]> findTagClicks(Long userId, LocalDateTime start, LocalDateTime end) {
         return em.createNativeQuery("""
-                SELECT pt.tag_name, COUNT(tl.tag_log_id) AS click_count
+                SELECT tl.tag_name, COUNT(tl.tag_log_id) AS click_count
                 FROM tag_log tl
-                JOIN promotion_tag pt ON tl.tag_id = pt.tag_id
-                JOIN promotion p ON pt.promotion_id = p.promotion_id
-                WHERE p.user_id = :userId
+                WHERE tl.user_id = :userId
                   AND tl.clicked_at >= :start
                   AND tl.clicked_at < :end
-                GROUP BY pt.tag_id, pt.tag_name
+                  AND tl.tag_name IS NOT NULL
+                GROUP BY tl.tag_name
                 ORDER BY click_count DESC
                 LIMIT 3
                 """)
