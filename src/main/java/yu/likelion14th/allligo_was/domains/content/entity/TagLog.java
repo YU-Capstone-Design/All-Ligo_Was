@@ -33,6 +33,12 @@ public class TagLog {
     @Column(name = "clicked_at", nullable = false)
     private LocalDateTime clickedAt;
 
+    @Column(name = "tag_name", nullable = false)
+    private String tagName;
+
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tag_id", nullable = false)
     private PromotionTag promotionTag;
