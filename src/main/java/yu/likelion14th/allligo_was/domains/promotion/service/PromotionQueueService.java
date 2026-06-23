@@ -128,7 +128,12 @@ public class PromotionQueueService {
         }
 
         if (CONTENT_STATUS_PUBLISHED.equals(contentStatus)) {
-            return null;
+            return PromotionScheduleQueueResDto.fromEntity(
+                    execution,
+                    CONTENT_STATUS_PUBLISHED,
+                    "업로드 완료",
+                    true
+            );
         }
 
         if (CONTENT_STATUS_CANCELLED.equals(contentStatus)) {
