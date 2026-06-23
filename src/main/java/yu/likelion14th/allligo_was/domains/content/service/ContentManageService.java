@@ -89,7 +89,7 @@ public class ContentManageService {
      * @param content 검증할 콘텐츠 엔티티
      */
     private void validatePreviewAvailable(Content content) {
-        if (!STATUS_GENERATED.equals(content.getStatus())) {
+        if (!STATUS_GENERATED.equals(content.getStatus()) && !STATUS_PUBLISHED.equals(content.getStatus())) {
             throw new CustomException(ErrorCode.CONTENT_PREVIEW_NOT_ALLOWED);
         }
     }
