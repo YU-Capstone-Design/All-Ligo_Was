@@ -42,7 +42,7 @@ public class PromotionQueueService {
      * @return 24시간 이내 스케줄링 대기열 응답 목록
      */
     public List<PromotionScheduleQueueResDto> getScheduleQueue(Long userId) {
-        LocalDateTime now = LocalDateTime.now().minusHours(1);
+        LocalDateTime now = LocalDateTime.now().minusHours(3);
         LocalDateTime endTime = now.plusHours(24);
 
         List<PromotionExecution> executions =
