@@ -46,6 +46,11 @@ public class FastapiScheduler {
     private final PromotionImageRepository promotionImageRepository;
     private final TransactionTemplate transactionTemplate;
 
+    // 예약 시각(executedAt)이 지난 뒤에도 생성 요청·유튜브 업로드를 이어서 시도하는 시간(분).
+    // 업로드가 길어져 다음 분 회차를 건너뛰거나 Was 가 재시작돼도 이 안에서 다시 처리하고, 업로드 실패도 매분 재시도한다.
+    // 넘기면 실행을 FAILED 로 정리한다(Agent 재시작으로 웹훅이 오지 않는 PROCESSING 포함).
+    private static final long LATE_TOLERANCE_MINUTES = 10;
+
     @Value("${app.backend.base-url:http://localhost:8080}")
     private String baseUrl;
 
@@ -62,11 +67,16 @@ public class FastapiScheduler {
         // 테스트 로직: 5분 전 생성 요청 (테스트용, 테스트 완료 후 위 주석 해제 및 본 줄 삭제)
         LocalDateTime oneHourLater = now.plusMinutes(5);
 
+        LocalDateTime lateLimit = now.minusMinutes(LATE_TOLERANCE_MINUTES);
+
         log.info("Two-Track Scheduler Running... now: {}, oneHourLater: {}", now, oneHourLater);
 
-        // Track A (T - 1시간): 영상 생성 요청
+        // 지연 허용 시간을 넘긴 실행 정리
+        expireOverdueExecutions(lateLimit);
+
+        // Track A (T - 1시간): 영상 생성 요청. 놓친 회차도 지연 허용 시간 안이면 요청
         List<Long> pendingExecutionIds = executionRepository.findAllByStatusAndExecutedAtBetween(
-                "PENDING", oneHourLater, oneHourLater.plusSeconds(59))
+                "PENDING", lateLimit, oneHourLater.plusSeconds(59))
                 .stream().map(PromotionExecution::getExecutionId).toList();
 
         for (Long executionId : pendingExecutionIds) {
@@ -77,10 +87,9 @@ public class FastapiScheduler {
             }
         }
 
-        // Track B (T - 0시간): 유튜브 업로드 요청
-        List<Long> uploadExecutionIds = executionRepository.findAllByExecutedAtBetween(
-                now, now.plusSeconds(59))
-                .stream().map(PromotionExecution::getExecutionId).toList();
+        // Track B (T - 0시간): 유튜브 업로드 요청. 실패·지연분은 지연 허용 시간 안에서 매분 재시도
+        // (Agent 가 같은 localVideoPath 재요청은 다시 올리지 않고 처음 URL 을 돌려주므로 중복 업로드 없음)
+        List<Long> uploadExecutionIds = executionRepository.findUploadTargetIds(lateLimit, now.plusSeconds(59));
 
         for (Long executionId : uploadExecutionIds) {
             try {
@@ -89,6 +98,25 @@ public class FastapiScheduler {
                 log.error("Track B failed for execution ID: {}", executionId, e);
             }
         }
+    }
+
+    private void expireOverdueExecutions(LocalDateTime lateLimit) {
+        // 하루 넘은 기록은 건드리지 않는다 (예전 데이터 일괄 변경 방지)
+        LocalDateTime from = lateLimit.minusDays(1);
+        Integer pending = transactionTemplate.execute(status -> executionRepository.expireByStatus(
+                "PENDING", from, lateLimit, "예약 시각 경과: 생성 요청을 보내지 못함"));
+        Integer processing = transactionTemplate.execute(status -> executionRepository.expireByStatus(
+                "PROCESSING", from, lateLimit, "생성 결과 미수신: Agent 응답 시간 초과"));
+        Integer notUploaded = transactionTemplate.execute(status -> executionRepository.expireNotUploaded(
+                from, lateLimit, "유튜브 업로드 실패: 지연 허용 시간 초과"));
+
+        if (isPositive(pending) || isPositive(processing) || isPositive(notUploaded)) {
+            log.warn("Expired overdue executions. pending: {}, processing: {}, notUploaded: {}", pending, processing, notUploaded);
+        }
+    }
+
+    private boolean isPositive(Integer count) {
+        return count != null && count > 0;
     }
 
     private void requestGeneration(Long executionId) {
@@ -248,7 +276,9 @@ public class FastapiScheduler {
                 log.info("Track B: Upload success. YouTube URL saved: {}", response.getYoutubeUrl());
             }
         } catch (Exception e) {
-            log.error("Track B upload request failed for execution ID: {}", executionId, e);
+            // 원인 스택은 FastapiClientService 가 남긴다. 지연 허용 시간 안이면 다음 분에 다시 시도한다.
+            String cause = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
+            log.warn("Track B upload request failed for execution ID: {}. Retry next minute. cause: {}", executionId, cause);
         }
     }
 
