@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import yu.likelion14th.allligo_was.domains.content.entity.Content;
+import yu.likelion14th.allligo_was.domains.content.entity.ContentStatus;
 import yu.likelion14th.allligo_was.domains.content.repository.ContentRepository;
 import yu.likelion14th.allligo_was.domains.promotion.entity.PromotionExecution;
 import yu.likelion14th.allligo_was.domains.promotion.entity.PromotionSchedule;
@@ -61,15 +62,23 @@ public class ContentCallbackService {
         if ("SUCCESS".equalsIgnoreCase(dto.getStatus()) && dto.getData() != null) {
             FastapiWebhookDto.WebhookData data = dto.getData();
             
+            Content existingContent = contentRepository.findByPromotionExecution(execution).orElse(null);
+
+            // 이미 발행·취소된 콘텐츠는 늦게 도착한 중복 웹훅으로 GENERATED 로 되돌리지 않음
+            if (existingContent != null && existingContent.getStatus() != null
+                    && !ContentStatus.GENERATED.equals(existingContent.getStatus())) {
+                log.info("Content already {}. Ignoring duplicate webhook. TaskId: {}", existingContent.getStatus(), dto.getTaskId());
+                return;
+            }
+
             // 기존 Content가 있는지 확인 후 없으면 생성
             PromotionExecution finalExecution = execution;
-            Content content = contentRepository.findByPromotionExecution(execution).orElseGet(() ->
+            Content content = existingContent != null ? existingContent :
                 Content.builder()
                     .promotionExecution(finalExecution)
                     .createdAt(LocalDateTime.now())
                     .contentType(data.getContentType())
-                    .build()
-            );
+                    .build();
 
             // 1. contentType에 따른 텍스트 분기 처리
             if ("POST".equalsIgnoreCase(data.getContentType())) {
@@ -82,8 +91,11 @@ public class ContentCallbackService {
             if (data.getPosterUrl() != null) {
                 content.setPosterUrl(data.getPosterUrl()); // 명칭 변경된 필드 적용
             }
+            // S3 업로드만 실패해도 Agent 서버의 영상(localVideoPath)으로 유튜브 업로드가 가능하므로 각각 저장
             if (data.getS3VideoUrl() != null) {
                 content.setS3VideoUrl(data.getS3VideoUrl());
+            }
+            if (data.getLocalVideoPath() != null) {
                 content.setLocalVideoPath(data.getLocalVideoPath());
             }
 
