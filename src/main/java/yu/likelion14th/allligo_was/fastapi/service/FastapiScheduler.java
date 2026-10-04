@@ -171,6 +171,17 @@ public class FastapiScheduler {
                 reqDto.setHashTag(hashTagStr);
             }
 
+            // 5. 날씨: 날씨 반영을 켠 홍보만 매장 좌표 전송 (좌표가 없거나 0,0 이면 보내지 않음 → Agent 는 '날씨 정보 없음' 으로 생성)
+            if (promotion.isWeatherEnabled() && promotion.getUser() != null) {
+                storeRepository.findFirstByUserUserIdOrderByStoreIdAsc(promotion.getUser().getUserId())
+                        .filter(store -> store.getLatitude() != null && store.getLongitude() != null)
+                        .filter(store -> store.getLatitude() != 0 || store.getLongitude() != 0)
+                        .ifPresent(store -> {
+                            reqDto.setLat(store.getLatitude());
+                            reqDto.setLon(store.getLongitude());
+                        });
+            }
+
             // --- Top 3 과거 우수 성과 콘텐츠 조회 및 매핑 ---
             try {
                 Long userId = promotion.getUser().getUserId();
