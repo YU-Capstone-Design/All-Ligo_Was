@@ -5,7 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 import yu.likelion14th.allligo_was.domains.content.entity.Content;
 import yu.likelion14th.allligo_was.domains.content.entity.ContentStatus;
 import yu.likelion14th.allligo_was.domains.content.repository.ContentRepository;
@@ -14,6 +17,7 @@ import yu.likelion14th.allligo_was.domains.promotion.repository.PromotionExecuti
 import yu.likelion14th.allligo_was.domains.promotion.repository.PromotionImageRepository;
 import yu.likelion14th.allligo_was.domains.promotion.repository.PromotionTagRepository;
 import yu.likelion14th.allligo_was.domains.store.repository.StoreRepository;
+import yu.likelion14th.allligo_was.fastapi.dto.FastapiContentResponseDto;
 import yu.likelion14th.allligo_was.fastapi.dto.FastapiUploadResponseDto;
 
 import java.time.LocalDateTime;
@@ -22,6 +26,8 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -41,21 +47,60 @@ class FastapiSchedulerTest {
     private StoreRepository storeRepository;
     @Mock
     private PromotionImageRepository promotionImageRepository;
+    @Spy
+    private TransactionTemplate transactionTemplate = new TransactionTemplate(mock(PlatformTransactionManager.class));
 
     @InjectMocks
     private FastapiScheduler fastapiScheduler;
 
-    private final PromotionExecution execution = PromotionExecution.builder()
-            .executionId(1L)
-            .executedAt(LocalDateTime.now())
-            .status("SUCCESS")
-            .build();
+    @Test
+    @DisplayName("Track A: 생성 요청 후 taskId 만 갱신하고 실행 엔티티를 통째로 다시 저장하지 않는다")
+    void storesOnlyTaskIdAfterGenerationRequest() {
+        PromotionExecution execution = execution("PENDING");
+        when(executionRepository.findAllByStatusAndExecutedAtBetween(eq("PENDING"), any(), any())).thenReturn(List.of(execution));
+        when(executionRepository.findById(1L)).thenReturn(Optional.of(execution));
+        when(fastapiClientService.generateContent(any()))
+                .thenReturn(new FastapiContentResponseDto("task-9", "PROCESSING", "Background task started"));
+
+        fastapiScheduler.executeTwoTrackScheduler();
+
+        assertThat(execution.getStatus()).isEqualTo("PROCESSING");
+        verify(executionRepository).updateTaskId(1L, "task-9");
+        verify(executionRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Track A: 생성 요청이 실패하면 아직 PROCESSING 인 경우에만 FAILED 로 바꾼다")
+    void marksFailedOnlyIfStillProcessing() {
+        PromotionExecution execution = execution("PENDING");
+        when(executionRepository.findAllByStatusAndExecutedAtBetween(eq("PENDING"), any(), any())).thenReturn(List.of(execution));
+        when(executionRepository.findById(1L)).thenReturn(Optional.of(execution));
+        when(fastapiClientService.generateContent(any())).thenThrow(new RuntimeException("Failed to call FastAPI"));
+
+        fastapiScheduler.executeTwoTrackScheduler();
+
+        verify(executionRepository).markFailedIfProcessing(1L, "Failed to call FastAPI");
+    }
+
+    @Test
+    @DisplayName("Track A: 다시 읽었을 때 이미 PENDING 이 아니면 생성 요청을 보내지 않는다")
+    void skipsExecutionNoLongerPending() {
+        PromotionExecution execution = execution("PENDING");
+        when(executionRepository.findAllByStatusAndExecutedAtBetween(eq("PENDING"), any(), any())).thenReturn(List.of(execution));
+        when(executionRepository.findById(1L)).thenReturn(Optional.of(execution("SUCCESS")));
+
+        fastapiScheduler.executeTwoTrackScheduler();
+
+        verify(fastapiClientService, never()).generateContent(any());
+    }
 
     @Test
     @DisplayName("Track B: 배포 중단된 콘텐츠는 유튜브에 업로드하지 않는다")
     void skipsUploadForCancelledContent() {
-        Content content = videoContent(ContentStatus.CANCELLED);
+        PromotionExecution execution = execution("SUCCESS");
+        Content content = videoContent(execution, ContentStatus.CANCELLED);
         when(executionRepository.findAllByExecutedAtBetween(any(), any())).thenReturn(List.of(execution));
+        when(executionRepository.findById(1L)).thenReturn(Optional.of(execution));
         when(contentRepository.findByPromotionExecution(execution)).thenReturn(Optional.of(content));
 
         fastapiScheduler.executeTwoTrackScheduler();
@@ -67,9 +112,12 @@ class FastapiSchedulerTest {
     @Test
     @DisplayName("Track B: 생성 완료된 콘텐츠는 업로드 후 PUBLISHED 로 바꾼다")
     void uploadsGeneratedContent() {
-        Content content = videoContent(ContentStatus.GENERATED);
+        PromotionExecution execution = execution("SUCCESS");
+        Content content = videoContent(execution, ContentStatus.GENERATED);
         when(executionRepository.findAllByExecutedAtBetween(any(), any())).thenReturn(List.of(execution));
+        when(executionRepository.findById(1L)).thenReturn(Optional.of(execution));
         when(contentRepository.findByPromotionExecution(execution)).thenReturn(Optional.of(content));
+        when(contentRepository.findById(10L)).thenReturn(Optional.of(content));
         when(fastapiClientService.uploadToYoutube(any())).thenReturn(FastapiUploadResponseDto.builder()
                 .status("SUCCESS")
                 .youtubeUrl("https://youtu.be/abc")
@@ -81,7 +129,15 @@ class FastapiSchedulerTest {
         assertThat(content.getUploadVideoUrl()).isEqualTo("https://youtu.be/abc");
     }
 
-    private Content videoContent(String status) {
+    private PromotionExecution execution(String status) {
+        return PromotionExecution.builder()
+                .executionId(1L)
+                .executedAt(LocalDateTime.now())
+                .status(status)
+                .build();
+    }
+
+    private Content videoContent(PromotionExecution execution, String status) {
         return Content.builder()
                 .contentId(10L)
                 .promotionExecution(execution)
