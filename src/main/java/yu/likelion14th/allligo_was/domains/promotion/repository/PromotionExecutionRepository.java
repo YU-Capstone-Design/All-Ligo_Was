@@ -29,6 +29,17 @@ public interface PromotionExecutionRepository extends JpaRepository<PromotionExe
     @Query("UPDATE PromotionExecution pe SET pe.promotionSchedule = null WHERE pe.promotion.promotionId = :promotionId")
     void nullifyScheduleIdByPromotionId(@Param("promotionId") Long promotionId);
 
+    // 생성 요청 응답의 taskId 만 저장한다. 그 사이 웹훅이 바꾼 상태(SUCCESS/FAILED)는 건드리지 않는다.
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE PromotionExecution pe SET pe.taskId = :taskId WHERE pe.executionId = :executionId")
+    int updateTaskId(@Param("executionId") Long executionId, @Param("taskId") String taskId);
+
+    // 생성 요청 실패 시, 아직 PROCESSING 인 경우에만 FAILED 로 바꾼다.
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE PromotionExecution pe SET pe.status = 'FAILED', pe.errorMessage = :errorMessage "
+            + "WHERE pe.executionId = :executionId AND pe.status = 'PROCESSING'")
+    int markFailedIfProcessing(@Param("executionId") Long executionId, @Param("errorMessage") String errorMessage);
+
     @Query("""
         SELECT DISTINCT pe
         FROM PromotionExecution pe
