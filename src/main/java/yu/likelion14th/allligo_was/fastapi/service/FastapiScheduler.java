@@ -7,6 +7,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import yu.likelion14th.allligo_was.domains.content.entity.Content;
+import yu.likelion14th.allligo_was.domains.content.entity.ContentStatus;
 import yu.likelion14th.allligo_was.domains.content.repository.ContentRepository;
 import yu.likelion14th.allligo_was.domains.promotion.entity.Promotion;
 import yu.likelion14th.allligo_was.domains.promotion.entity.PromotionExecution;
@@ -208,6 +209,12 @@ public class FastapiScheduler {
 
             if (content == null || content.getLocalVideoPath() == null) {
                 log.warn("Track B: No Content or LocalVideoPath found for execution ID: {}", execution.getExecutionId());
+                continue;
+            }
+
+            // 생성 완료(GENERATED) 상태만 업로드. 배포 중단(CANCELLED)·이미 발행(PUBLISHED)된 콘텐츠는 건너뜀
+            if (!ContentStatus.GENERATED.equals(content.getStatus())) {
+                log.info("Track B: Skip upload. Content ID: {} status is {}", content.getContentId(), content.getStatus());
                 continue;
             }
 
