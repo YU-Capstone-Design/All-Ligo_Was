@@ -26,14 +26,23 @@ public class ContentCallbackService {
     private final ContentRepository contentRepository;
     private final NotificationService notificationService;
 
+    // 웹훅 처리 결과. 컨트롤러가 응답 코드로 바꾼다 (Agent 는 2xx 가 아니면 실패로 보고 보관한다)
+    public enum WebhookResult {
+        PROCESSED,              // 200
+        INVALID,                // 400: taskId·status 누락. 재시도해도 의미 없음
+        EXECUTION_NOT_FOUND     // 503: 아직 실행을 못 찾음(커밋 직전 경합 등). Agent 가 2초·5초 뒤 재시도
+    }
+
     @Transactional
-    public void processWebhook(FastapiWebhookDto dto) {
+    public WebhookResult processWebhook(FastapiWebhookDto dto) {
         log.info("Received webhook callback from FastAPI. TaskId: {}, Status: {}", dto.getTaskId(), dto.getStatus());
 
-        PromotionExecution execution = null;
-        if (dto.getTaskId() != null && !dto.getTaskId().isEmpty()) {
-            execution = executionRepository.findByTaskId(dto.getTaskId()).orElse(null);
+        if (dto.getTaskId() == null || dto.getTaskId().isBlank() || dto.getStatus() == null) {
+            log.warn("Invalid webhook payload. TaskId: {}, Status: {}", dto.getTaskId(), dto.getStatus());
+            return WebhookResult.INVALID;
         }
+
+        PromotionExecution execution = executionRepository.findByTaskId(dto.getTaskId()).orElse(null);
 
         // taskId로 못 찾았고 scheduleId가 있다면 기존 로직(최근 실행 건 조회)을 Fallback으로 사용
         if (execution == null && dto.getScheduleId() != null) {
@@ -49,7 +58,7 @@ public class ContentCallbackService {
 
         if (execution == null) {
             log.warn("No PromotionExecution found for Task ID: {} and Schedule ID: {}", dto.getTaskId(), dto.getScheduleId());
-            return;
+            return WebhookResult.EXECUTION_NOT_FOUND;
         }
 
         // 상태 업데이트
@@ -68,7 +77,7 @@ public class ContentCallbackService {
             if (existingContent != null && existingContent.getStatus() != null
                     && !ContentStatus.GENERATED.equals(existingContent.getStatus())) {
                 log.info("Content already {}. Ignoring duplicate webhook. TaskId: {}", existingContent.getStatus(), dto.getTaskId());
-                return;
+                return WebhookResult.PROCESSED;
             }
 
             // 기존 Content가 있는지 확인 후 없으면 생성
@@ -108,5 +117,6 @@ public class ContentCallbackService {
         } else {
             log.warn("Webhook failed or data missing. TaskId: {}, Error: {}", dto.getTaskId(), dto.getError());
         }
+        return WebhookResult.PROCESSED;
     }
 }

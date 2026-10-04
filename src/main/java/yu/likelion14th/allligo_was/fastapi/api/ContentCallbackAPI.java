@@ -22,6 +22,16 @@ public interface ContentCallbackAPI {
             responseCode = "200",
             description = "웹훅 처리 성공",
             content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "Webhook processed"))
+        ),
+        @ApiResponse(
+            responseCode = "400",
+            description = "taskId·status 누락 (Agent 는 재시도하지 않고 보관)",
+            content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "Invalid webhook payload"))
+        ),
+        @ApiResponse(
+            responseCode = "503",
+            description = "해당 taskId 의 실행을 아직 찾지 못함 (Agent 가 2초·5초 뒤 재시도)",
+            content = @Content(mediaType = "text/plain", examples = @ExampleObject(value = "Execution not found"))
         )
     })
     ResponseEntity<String> handleContentCallback(

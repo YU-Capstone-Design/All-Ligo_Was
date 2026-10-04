@@ -2,6 +2,7 @@ package yu.likelion14th.allligo_was.fastapi.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,7 +24,10 @@ public class ContentCallbackController implements ContentCallbackAPI {
     @PostMapping("/content-callback")
     public ResponseEntity<String> handleContentCallback(@RequestBody FastapiWebhookDto payload) {
         log.info("Webhook received from FastAPI. Task ID: {}", payload.getTaskId());
-        contentCallbackService.processWebhook(payload);
-        return ResponseEntity.ok("Webhook processed");
+        return switch (contentCallbackService.processWebhook(payload)) {
+            case PROCESSED -> ResponseEntity.ok("Webhook processed");
+            case INVALID -> ResponseEntity.badRequest().body("Invalid webhook payload");
+            case EXECUTION_NOT_FOUND -> ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body("Execution not found");
+        };
     }
 }
