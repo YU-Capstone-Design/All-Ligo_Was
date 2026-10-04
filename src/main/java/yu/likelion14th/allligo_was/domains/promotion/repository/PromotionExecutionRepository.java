@@ -34,6 +34,32 @@ public interface PromotionExecutionRepository extends JpaRepository<PromotionExe
     @Query("UPDATE PromotionExecution pe SET pe.taskId = :taskId WHERE pe.executionId = :executionId")
     int updateTaskId(@Param("executionId") Long executionId, @Param("taskId") String taskId);
 
+    // 유튜브 업로드 대상: 구간 안에서 생성 완료(GENERATED)된 영상 콘텐츠가 있는 실행
+    @Query("SELECT pe.executionId FROM PromotionExecution pe JOIN pe.content c "
+            + "WHERE pe.executedAt BETWEEN :from AND :to "
+            + "AND c.status = 'GENERATED' AND c.localVideoPath IS NOT NULL "
+            + "ORDER BY pe.executedAt ASC")
+    List<Long> findUploadTargetIds(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
+    // 지연 허용 시간이 지나도록 생성 요청·결과 수신이 끝나지 않은 실행을 FAILED 로 정리
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE PromotionExecution pe SET pe.status = 'FAILED', pe.errorMessage = :errorMessage "
+            + "WHERE pe.status = :status AND pe.executedAt >= :from AND pe.executedAt < :to")
+    int expireByStatus(@Param("status") String status,
+                       @Param("from") LocalDateTime from,
+                       @Param("to") LocalDateTime to,
+                       @Param("errorMessage") String errorMessage);
+
+    // 지연 허용 시간 안에 유튜브 업로드를 못 한 영상의 실행을 FAILED 로 정리 (콘텐츠는 GENERATED 로 남아 미리보기 가능)
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE PromotionExecution pe SET pe.status = 'FAILED', pe.errorMessage = :errorMessage "
+            + "WHERE pe.status = 'SUCCESS' AND pe.executedAt >= :from AND pe.executedAt < :to "
+            + "AND EXISTS (SELECT c.contentId FROM Content c WHERE c.promotionExecution = pe "
+            + "AND c.status = 'GENERATED' AND c.localVideoPath IS NOT NULL)")
+    int expireNotUploaded(@Param("from") LocalDateTime from,
+                          @Param("to") LocalDateTime to,
+                          @Param("errorMessage") String errorMessage);
+
     // 생성 요청 실패 시, 아직 PROCESSING 인 경우에만 FAILED 로 바꾼다.
     @Modifying(clearAutomatically = true)
     @Query("UPDATE PromotionExecution pe SET pe.status = 'FAILED', pe.errorMessage = :errorMessage "
