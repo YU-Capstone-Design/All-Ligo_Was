@@ -52,8 +52,10 @@ class ContentCallbackServiceTest {
         when(contentRepository.findByPromotionExecution(execution)).thenReturn(Optional.empty());
         when(contentRepository.save(any(Content.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        contentCallbackService.processWebhook(videoWebhook(null, "static/videos/shortform_1.mp4"));
+        ContentCallbackService.WebhookResult result =
+                contentCallbackService.processWebhook(videoWebhook(null, "static/videos/shortform_1.mp4"));
 
+        assertThat(result).isEqualTo(ContentCallbackService.WebhookResult.PROCESSED);
         ArgumentCaptor<Content> saved = ArgumentCaptor.forClass(Content.class);
         verify(contentRepository).save(saved.capture());
         assertThat(saved.getValue().getS3VideoUrl()).isNull();
@@ -78,6 +80,26 @@ class ContentCallbackServiceTest {
         assertThat(cancelled.getStatus()).isEqualTo(ContentStatus.CANCELLED);
         verify(contentRepository, never()).save(any(Content.class));
         verify(notificationService, never()).createContentGeneratedNotification(any());
+    }
+
+    @Test
+    @DisplayName("taskId 가 없는 웹훅은 INVALID 로 처리한다 (400, Agent 재시도 없음)")
+    void rejectsWebhookWithoutTaskId() {
+        FastapiWebhookDto webhook = FastapiWebhookDto.builder().status("SUCCESS").scheduleId("3").build();
+
+        assertThat(contentCallbackService.processWebhook(webhook))
+                .isEqualTo(ContentCallbackService.WebhookResult.INVALID);
+        verify(executionRepository, never()).findByTaskId(any());
+    }
+
+    @Test
+    @DisplayName("taskId 로 실행을 못 찾으면 EXECUTION_NOT_FOUND 로 처리한다 (503, Agent 재시도)")
+    void returnsNotFoundWhenExecutionMissing() {
+        when(executionRepository.findByTaskId("task-1")).thenReturn(Optional.empty());
+
+        assertThat(contentCallbackService.processWebhook(videoWebhook(null, "static/videos/shortform_1.mp4")))
+                .isEqualTo(ContentCallbackService.WebhookResult.EXECUTION_NOT_FOUND);
+        verify(contentRepository, never()).save(any(Content.class));
     }
 
     private FastapiWebhookDto videoWebhook(String s3VideoUrl, String localVideoPath) {
