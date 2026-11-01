@@ -16,6 +16,8 @@ import yu.likelion14th.allligo_was.domains.user.entity.User;
 import yu.likelion14th.allligo_was.domains.user.repository.UserRepository;
 import yu.likelion14th.allligo_was.exception.CustomException;
 import yu.likelion14th.allligo_was.exception.ErrorCode;
+import org.springframework.transaction.annotation.Transactional;
+import yu.likelion14th.allligo_was.domains.content.dto.response.PublicContentResDto;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -33,6 +35,7 @@ public class ContentService {
 
     /**
      * 조회수 증가 및
+     *
      * @param contentId 컨텐츠 ID
      * @return URL문자열 (소상공인 URL)
      */
@@ -41,17 +44,15 @@ public class ContentService {
         Content content = contentRepository.findById(contentId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CONTENT_NOT_FOUND));
 
-
         // 2. 소상공인 및 가게 조회
         User owner = content.getPromotionExecution().getPromotion().getUser();
 
-        if(owner == null){
+        if (owner == null) {
             throw new CustomException(ErrorCode.USER_NOT_FOUND);
         }
 
         Store store = storeRepository.findByUser(owner)
                 .orElseThrow(() -> new CustomException(ErrorCode.STORE_NOT_FOUND));
-
 
         // 3. 클릭 로그 조회 생성
         clickLogRepository.save(ClickLog.builder()
@@ -61,12 +62,11 @@ public class ContentService {
                 .clickedAt(LocalDateTime.now())
                 .build());
 
-
         // 4. 태그 로그 조회 생성
         List<PromotionTag> tags = content.getPromotionExecution().getPromotion().getTags();
 
         // 클릭된 태그들 로그로 저장
-        for(PromotionTag tag : tags){
+        for (PromotionTag tag : tags) {
             tagLogRepository.save(TagLog.builder()
                     .clickedAt(LocalDateTime.now())
                     .promotionTag(tag)
@@ -78,4 +78,26 @@ public class ContentService {
         // 5. 소상공인 가게URL 반환
         return store.getMapUrl();
     }
+
+    /**
+     * 비로그인 사용자용 매장별 공개 콘텐츠 목록 조회
+     *
+     * @param storeId 조회할 매장 ID
+     * @return 해당 매장의 발행 완료 콘텐츠 목록
+     */
+    @Transactional(readOnly = true)
+    public List<PublicContentResDto> getPublicContentsByStoreId(Long storeId) {
+
+        // 매장 존재 여부 확인
+        if (!storeRepository.existsById(storeId)) {
+            throw new CustomException(ErrorCode.STORE_NOT_FOUND);
+        }
+
+        // 발행 완료된 콘텐츠만 조회하여 DTO 변환
+        return contentRepository.findPublishedContentsByStoreId(storeId)
+                .stream()
+                .map(PublicContentResDto::fromEntity)
+                .toList();
+    }
+
 }

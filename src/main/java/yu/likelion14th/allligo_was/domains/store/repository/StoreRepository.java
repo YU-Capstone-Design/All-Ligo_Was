@@ -17,12 +17,30 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
     List<Store> findAllByRegionHavingCoupons(@Param("region") String region);
 
     @Query(value = "SELECT DISTINCT s.* FROM store s " +
-                   "INNER JOIN coupon c ON s.store_id = c.store_id " +
-                   "WHERE ST_Distance_Sphere(POINT(s.longitude, s.latitude), POINT(?2, ?1)) <= 3000 " +
-                   "ORDER BY ST_Distance_Sphere(POINT(s.longitude, s.latitude), POINT(?2, ?1)) ASC",
-           nativeQuery = true)
+            "INNER JOIN coupon c ON s.store_id = c.store_id " +
+            "WHERE ST_Distance_Sphere(POINT(s.longitude, s.latitude), POINT(?2, ?1)) <= 3000 " +
+            "ORDER BY ST_Distance_Sphere(POINT(s.longitude, s.latitude), POINT(?2, ?1)) ASC", nativeQuery = true)
     List<Store> findNearbyStoresHavingCoupons(@Param("latitude") Double latitude, @Param("longitude") Double longitude);
 
-    //사용자가 등록한 가게들 중 storeId가 가장 작은 가게 조회
+    // 사용자가 등록한 가게들 중 storeId가 가장 작은 가게 조회
     Optional<Store> findFirstByUserUserIdOrderByStoreIdAsc(Long userId);
+
+    @Query(value = """
+            SELECT s.*
+            FROM store s
+            WHERE s.latitude IS NOT NULL
+              AND s.longitude IS NOT NULL
+              AND ST_Distance_Sphere(
+                  POINT(s.longitude, s.latitude),
+                  POINT(:longitude, :latitude)
+              ) <= :radius
+            ORDER BY ST_Distance_Sphere(
+                POINT(s.longitude, s.latitude),
+                POINT(:longitude, :latitude)
+            ) ASC
+            """, nativeQuery = true)
+    List<Store> findPublicNearbyStores(
+            @Param("latitude") Double latitude,
+            @Param("longitude") Double longitude,
+            @Param("radius") Double radius);
 }

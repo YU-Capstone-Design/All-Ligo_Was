@@ -51,7 +51,9 @@ public class SecurityConfig {
                                 "/api/v1/contents/track/**",
                                 "/api/v1/coupons/region/stores",
                                 "/api/v1/coupons/nearby/stores",
-                                "/api/v1/coupons/stores/*"
+                                "/api/v1/coupons/stores/*",
+                                "/api/v1/contents/public/stores/*",
+                                "/api/v1/stores/public"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
