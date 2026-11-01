@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import yu.likelion14th.allligo_was.domains.content.api.ContentAPI;
 import yu.likelion14th.allligo_was.domains.content.service.ContentManageService;
 import yu.likelion14th.allligo_was.domains.content.service.ContentService;
+import java.util.List;
+import yu.likelion14th.allligo_was.domains.content.dto.response.PublicContentResDto;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -60,6 +62,15 @@ public class ContentController implements ContentAPI {
                 return (Long) SecurityContextHolder.getContext()
                                 .getAuthentication()
                                 .getPrincipal();
+        }
+
+        @Override
+        @GetMapping("/public/stores/{storeId}")
+        public ResponseEntity<List<PublicContentResDto>> getPublicContents(
+                        @PathVariable("storeId") Long storeId) {
+
+                return ResponseEntity.ok(
+                                contentService.getPublicContentsByStoreId(storeId));
         }
 
 }

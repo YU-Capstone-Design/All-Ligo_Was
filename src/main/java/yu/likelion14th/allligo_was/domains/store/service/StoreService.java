@@ -7,7 +7,8 @@ import yu.likelion14th.allligo_was.domains.coupon.repository.CouponRepository;
 import yu.likelion14th.allligo_was.domains.store.dto.response.StoreResponseDto;
 import yu.likelion14th.allligo_was.domains.store.entity.Store;
 import yu.likelion14th.allligo_was.domains.store.repository.StoreRepository;
-
+import yu.likelion14th.allligo_was.domains.content.repository.ContentRepository;
+import yu.likelion14th.allligo_was.domains.store.dto.response.PublicStoreResDto;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -20,11 +21,11 @@ public class StoreService {
 
     private final StoreRepository storeRepository;
     private final CouponRepository couponRepository;
+    private final ContentRepository contentRepository;
 
     private static final Set<String> ALLOWED_REGIONS = new HashSet<>(Arrays.asList(
             "서울", "인천", "경기", "강원", "대전", "세종", "충남", "충북",
-            "대구", "경북", "부산", "울산", "경남", "광주", "전남", "전북", "제주"
-    ));
+            "대구", "경북", "부산", "울산", "경남", "광주", "전남", "전북", "제주"));
 
     public List<StoreResponseDto> getStoresWithCouponsByRegion(String region) {
         validateRegion(region);
@@ -52,4 +53,20 @@ public class StoreService {
             throw new IllegalArgumentException("올바르지 않은 행정구역입니다.");
         }
     }
+
+    public List<PublicStoreResDto> getPublicStores() {
+        return storeRepository.findAll()
+                .stream()
+                .map(store -> {
+                    Long couponCount = couponRepository.countByStore(store);
+
+                    Long contentCount = contentRepository.countPublishedContentsByStoreId(
+                            store.getStoreId());
+
+                    return PublicStoreResDto.fromEntity(
+                            store, couponCount, contentCount);
+                })
+                .toList();
+    }
+
 }
