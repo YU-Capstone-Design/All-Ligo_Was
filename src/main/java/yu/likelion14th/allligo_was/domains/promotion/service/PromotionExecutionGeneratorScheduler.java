@@ -36,7 +36,8 @@ public class PromotionExecutionGeneratorScheduler {
         LocalDateTime now = LocalDateTime.now();
         log.info("PromotionExecutionGeneratorScheduler Running... now: {}", now);
 
-        List<Promotion> activePromotions = promotionRepository.findAllByDeadlineAfter(now);
+        // 마감일이 없는 홍보(기한 없음)도 실행 대상에 포함합니다.
+        List<Promotion> activePromotions = promotionRepository.findAllByDeadlineIsNullOrDeadlineAfter(now);
         List<PromotionExecution> newExecutions = new ArrayList<>();
 
         for (Promotion promotion : activePromotions) {

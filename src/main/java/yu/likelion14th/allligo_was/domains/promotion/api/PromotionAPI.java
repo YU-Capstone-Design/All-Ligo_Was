@@ -33,6 +33,7 @@ public interface PromotionAPI {
                     imageUrls는 1장 이상 5장 이하입니다.
                     tags는 10개 미만이며, 각 태그는 7자 이하입니다.
                     schedules는 1개 이상 등록해야 하며, publishTime은 현재 시간보다 1시간 이후여야 합니다.
+                    deadline은 선택값입니다. 생략하거나 null이면 기한 없이 스케줄이 실행되며, 입력 시 현재 시각 이후여야 합니다.
                     """
     )
     @ApiResponses({
@@ -189,6 +190,7 @@ public interface PromotionAPI {
 
                     수정 대상은 홍보 제목, 콘텐츠 타입, 프롬프트, 날씨 사용 여부, 분위기 태그, 마감일, 이미지 URL 목록, 태그 목록, 스케줄 목록입니다.
                     이미지, 태그, 스케줄은 기존 데이터를 전체 삭제한 뒤 요청값으로 다시 저장합니다.
+                    deadline은 선택값입니다. null로 보내면 기존 마감일이 해제되고, 값을 보내면 해당 마감일로 다시 설정됩니다. 입력 시 현재 시각 이후여야 합니다.
                     """
     )
     @ApiResponses({

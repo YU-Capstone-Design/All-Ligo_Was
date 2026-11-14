@@ -354,8 +354,9 @@ public class PromotionService {
 
         validateTags(request.getTags());
 
-        if (request.getDeadline() == null
-                || request.getDeadline().isBefore(LocalDateTime.now())) {
+        // 마감일은 선택값이며, 입력한 경우에만 현재 시각 이후인지 검증합니다.
+        if (request.getDeadline() != null
+                && request.getDeadline().isBefore(LocalDateTime.now())) {
             throw new CustomException(ErrorCode.INVALID_PROMOTION_DEADLINE);
         }
 
@@ -408,8 +409,9 @@ public class PromotionService {
 
         validateTags(request.getTags());
 
-        if (request.getDeadline() == null
-                || request.getDeadline().isBefore(LocalDateTime.now())) {
+        // 마감일은 선택값이며, 입력한 경우에만 현재 시각 이후인지 검증합니다.
+        if (request.getDeadline() != null
+                && request.getDeadline().isBefore(LocalDateTime.now())) {
             throw new CustomException(ErrorCode.INVALID_PROMOTION_DEADLINE);
         }
 

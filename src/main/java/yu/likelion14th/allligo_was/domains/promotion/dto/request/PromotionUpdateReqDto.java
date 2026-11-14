@@ -40,8 +40,7 @@ public class PromotionUpdateReqDto {
     @NotBlank(message = "분위기 태그를 선택해주세요.")
     private String mode;
 
-    @Schema(description = "수정할 홍보 요청의 마감일입니다.", example = "2026-07-10T23:59:00")
-    @NotNull(message = "마감일을 입력해주세요.")
+    @Schema(description = "수정할 홍보 요청의 마감일입니다. 선택값이며, null로 보내면 마감일이 해제되어 기한 없이 스케줄이 실행됩니다. 입력 시 현재 시각 이후여야 합니다.", example = "2026-07-10T23:59:00", nullable = true)
     private LocalDateTime deadline;
 
     @Schema(description = "수정할 이미지 URL 목록입니다. 기존 이미지는 전체 삭제되고 요청값으로 다시 저장됩니다.", example = "[\"https://all-ligo-images.s3.ap-northeast-2.amazonaws.com/promotion/test/promotion_image1.jpg\"]")
