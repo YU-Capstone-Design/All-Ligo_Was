@@ -38,7 +38,7 @@ public enum ErrorCode {
     INVALID_PROMOTION_TAG_COUNT(HttpStatus.BAD_REQUEST, "해시태그는 10개 미만으로 등록해야 합니다."),
     INVALID_PROMOTION_TAG_LENGTH(HttpStatus.BAD_REQUEST, "해시태그는 7자 이하로 입력해주세요."),
     INVALID_PROMOTION_SCHEDULE(HttpStatus.BAD_REQUEST, "스케줄을 1개 이상 등록해야 합니다."),
-    INVALID_PROMOTION_DEADLINE(HttpStatus.BAD_REQUEST, "마감일을 입력해주세요."),
+    INVALID_PROMOTION_DEADLINE(HttpStatus.BAD_REQUEST, "마감일은 현재 시각 이후로 입력해주세요."),
     INVALID_PROMOTION_PUBLISH_TIME(HttpStatus.BAD_REQUEST, "배포 시간은 현재 시간보다 1시간 이후여야 합니다."),
     INVALID_PROMOTION_DAY_OF_WEEK(HttpStatus.BAD_REQUEST, "배포 요일 값이 올바르지 않습니다."),
     INVALID_PROMOTION_MODE(HttpStatus.BAD_REQUEST, "분위기 태그는 따뜻함, 차분함, 밝음 중 하나만 선택할 수 있습니다."),
