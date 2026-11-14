@@ -75,13 +75,18 @@ public class PromotionService {
 
         LocalDateTime now = LocalDateTime.now();
 
+        LocalDateTime deadline = null;
+        if(request.getDeadline() != null){
+            deadline = request.getDeadline();
+        }
+
         Promotion promotion = Promotion.builder()
                 .promotionTitle(request.getPromotionTitle())
                 .contentType(request.getContentType())
                 .prompt(request.getPrompt())
                 .isWeatherEnabled(Boolean.TRUE.equals(request.getWeatherEnabled()))
                 .mode(request.getMode())
-                .deadline(request.getDeadline())
+                .deadline(deadline)
                 .createdAt(now)
                 .updatedAt(now)
                 .user(user)
