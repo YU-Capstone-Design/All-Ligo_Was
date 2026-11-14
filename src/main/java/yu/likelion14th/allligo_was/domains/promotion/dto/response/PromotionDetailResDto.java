@@ -38,7 +38,7 @@ public class PromotionDetailResDto {
     @Schema(description = "콘텐츠 분위기 태그", example = "따뜻함")
     private String mode;
 
-    @Schema(description = "홍보 요청 마감일", example = "2026-06-30T23:59:00")
+    @Schema(description = "홍보 요청 마감일 (마감일이 없으면 null)", example = "2026-06-30T23:59:00", nullable = true)
     private LocalDateTime deadline;
 
     @Schema(description = "홍보 요청 등록 시각", example = "2026-06-02T20:40:00")
