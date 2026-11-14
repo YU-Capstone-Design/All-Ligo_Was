@@ -41,7 +41,6 @@ public class PromotionCreateReqDto {
     private String mode;
 
     @Schema(description = "홍보 요청의 마감일입니다. 마감일 이후에는 스케줄 실행 대상에서 제외됩니다.", example = "2026-06-30T23:59:00")
-    @NotNull(message = "마감일을 입력해주세요.")
     private LocalDateTime deadline;
 
     @Schema(description = "홍보에 사용할 이미지 URL 목록입니다. 1장 이상 5장 이하로 등록할 수 있습니다.", example = "[\"https://all-ligo-images.s3.ap-northeast-2.amazonaws.com/promotion/test/promotion_image1.jpg\", \"https://all-ligo-images.s3.ap-northeast-2.amazonaws.com/promotion/test/promotion_image2.jpg\"]")
