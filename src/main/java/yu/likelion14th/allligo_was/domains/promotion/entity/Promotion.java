@@ -53,7 +53,7 @@ public class Promotion {
     @Column(name="deadline")
     private LocalDateTime deadline;
 
-    @Column(name="mode", nullable = true)
+    @Column(name="mode")
     private String mode;
 
     @ManyToOne(fetch = FetchType.LAZY)
